@@ -1,3 +1,9 @@
+import importlib
+
+from .wrappers.pyobj import PyObj
+from .jsobj import W_String
+
+
 from rpython.rlib.rarithmetic import intmask
 from rpython.rlib import jit
 
@@ -251,11 +257,19 @@ class LOAD_MEMBER(Opcode):
     _stack_change = -1
 
     def eval(self, ctx):
-        w_obj = ctx.stack_pop().ToObject()
-        w_name = ctx.stack_pop()
-        value = w_obj.w_get(w_name)
+        obj = ctx.stack_pop()
+        w_value = None
+        
+        if isinstance(obj, PyObj):
+            w_name = ctx.stack_pop()
+            value = getattr(obj.getObj(), w_name.to_string())
+            w_value = W_String(unicode(value))
+        else:
+            w_obj = obj.ToObject()
+            w_name = ctx.stack_pop()
+            w_value = w_obj.w_get(w_name)
 
-        ctx.stack_append(value)
+        ctx.stack_append(w_value)
 
     def __str__(self):
         return 'LOAD_MEMBER'
@@ -552,7 +566,21 @@ class STORE(Opcode):
 
     def __str__(self):
         return 'STORE "%s" (%d)' % (self.identifier, self.index)
-
+    
+class IMPORT_NAME(Opcode):
+    _stack_change = 0
+    
+    def __init__(self, index, identifier):
+        self.identifier = identifier
+        self.index = index
+        
+    def eval(self, ctx):
+        ref = ctx.get_ref(self.identifier, self.index)
+        mod = importlib.import_module(self.identifier)
+        ref.put_value(PyObj(mod), self.identifier)
+    
+    def __str__(self):
+        return 'IMPORT_NAME (%s)' % (self.identifier)
 
 class LABEL(Opcode):
     _stack_change = 0

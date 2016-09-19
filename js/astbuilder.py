@@ -288,6 +288,12 @@ class ASTBuilder(RPythonVisitor):
         nodes = [self.dispatch(child) for child in node.children]
         return operations.VariableDeclList(pos, nodes)
     visit_variabledeclarationlistnoin = visit_variabledeclarationlist
+    
+    def visit_modulevariableidentifierlist(self, node):
+        pos = self.get_pos(node)
+        nodes = [self.dispatch(child) for child in node.children]
+        return operations.ModuleVariableIdentifierList(pos, nodes)
+    visit_modulevariableidentifierlistnoin = visit_modulevariableidentifierlist
 
     def visit_propertynameandvalue(self, node):
         pos = self.get_pos(node)
@@ -327,6 +333,20 @@ class ASTBuilder(RPythonVisitor):
         pos = self.get_pos(node)
         body = self.dispatch(node.children[0])
         return operations.Variable(pos, body)
+    
+    def visit_importstatement(self, node):
+        pos = self.get_pos(node)
+        moduleVars = self.dispatch(node.children[0])
+        moduleName = self.dispatch(node.children[1])
+        return operations.Import(pos, moduleVars, moduleName)
+    
+    def visit_moduleidentifier(self, node):
+        pos = self.get_pos(node)
+        identifier = self.dispatch(node.children[0])
+        identifier_name = identifier.get_literal()
+        index = self.declare_variable(identifier_name)
+        return operations.ModuleIdentifier(pos, index, identifier)
+    visit_moduleidentifiernoin = visit_moduleidentifier
 
     def visit_throwstatement(self, node):
         pos = self.get_pos(node)
@@ -403,6 +423,18 @@ class ASTBuilder(RPythonVisitor):
         #else:
         return operations.VariableDeclaration(pos, identifier, index, expr)
     visit_variabledeclarationnoin = visit_variabledeclaration
+    
+    def visit_modulevariableidentifier(self, node):
+        pos = self.get_pos(node)
+        identifier = self.dispatch(node.children[0])
+        identifier_name = identifier.get_literal()
+        # index = self.declare_variable(identifier_name)
+        # if len(node.children) > 1:
+        #     expr = self.dispatch(node.children[1])
+        # else:
+        #     expr = None
+        return operations.ModuleVariableIdentifier(pos, identifier)
+    visit_modulevariableidentifiernoin = visit_modulevariableidentifier
 
     def visit_expressionstatement(self, node):
         pos = self.get_pos(node)

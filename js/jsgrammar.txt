@@ -20,6 +20,7 @@ sourceelementsemiopt   : <functiondeclaration>
 
 statement   : <block>
             | <variablestatement> [";"]
+            | <importstatement> [";"]
             | <emptystatement>
             | <expressionstatement> [";"]
             | <ifstatement>
@@ -36,6 +37,7 @@ statement   : <block>
 
 statementsemiopt   : <block>
             | <variablestatement> [";"]?
+            | <importstatement> [";"]?
             | <emptystatement>
             | <expressionstatement> [";"]?
             | <ifstatement>
@@ -57,9 +59,22 @@ block   : "{" >statementlist<? ["}"]
 statementlist   : statement >statementlist<
                 | statementsemiopt
                 ;
+                
+importstatement   : ["import"] ["{"] modulevariableidentifierlist ["}"] ["from"] moduleidentifier
+                  ;
+
+modulevariableidentifier   : identifier
+                           ;
+
+modulevariableidentifierlist   : modulevariableidentifier [","] >modulevariableidentifierlist<
+                               | modulevariableidentifier
+                               ;
+
+moduleidentifier   : identifier
+                   ;
 
 variablestatement   : ["var"] variabledeclarationlist
-                    ; 
+                    ;
 
 variabledeclarationlist : variabledeclaration [","] >variabledeclarationlist<
                         | variabledeclaration

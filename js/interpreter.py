@@ -9,7 +9,7 @@ def load_file(filename):
 
 class InterpreterConfig(object):
     def __init__(self, config={}):
-        self.debug = config.get('debug', False)
+        self.debug = config.get('debug', True)
 
 
 class Interpreter(object):
@@ -34,7 +34,7 @@ class Interpreter(object):
 
         from js.jscode import ast_to_bytecode
         code = ast_to_bytecode(ast, symbol_map)
-
+        
         return self.run(code)
 
     def run_src(self, src):

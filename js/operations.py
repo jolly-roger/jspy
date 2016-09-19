@@ -826,6 +826,35 @@ class VariableDeclaration(Expression):
 
     def __str__(self):
         return "VariableDeclaration %s:%s" % (self.identifier, self.expr)
+    
+class ModuleIdentifier(Expression):
+    def __init__(self, pos, index, identifier):
+        self.pos = pos
+        self.index = index
+        self.identifier = identifier.get_literal()
+
+    def emit(self, bytecode):
+        bytecode.emit('IMPORT_NAME', self.index, self.identifier)
+        # bytecode.emit('STORE', self.index, self.identifier)
+
+    def __str__(self):
+        return "ModuleIdentifier %s" % (self.identifier)
+
+class ModuleVariableIdentifier(Expression):
+    def __init__(self, pos, identifier):
+        self.pos = pos
+        self.identifier = identifier.get_literal()
+
+    def emit(self, bytecode):
+        # if self.expr is not None:
+        #     self.expr.emit(bytecode)
+        #     bytecode.emit('STORE', self.index, self.identifier)
+        # else:
+            # variable declaration actualy does nothing
+        bytecode.emit('LOAD_UNDEFINED')
+
+    def __str__(self):
+        return "ModuleVariableIdentifier %s" % (self.identifier)
 
 #class LocalVariableDeclaration(Expression):
 #    def __init__(self, pos, identifier, local, expr=None):
@@ -875,7 +904,24 @@ class VariableDeclList(Statement):
             node.emit(bytecode)
         else:
             bytecode.emit('LOAD_UNDEFINED')
+            
+class ModuleVariableIdentifierList(Statement):
+    def __init__(self, pos, nodes):
+        self.pos = pos
+        self.nodes = nodes
 
+    def emit(self, bytecode):
+        nodes = self.nodes
+        if len(nodes) > 1:
+            for node in nodes[:-1]:
+                node.emit(bytecode)
+                bytecode.emit('POP')
+
+        if len(nodes) > 0:
+            node = nodes[-1]
+            node.emit(bytecode)
+        else:
+            bytecode.emit('LOAD_UNDEFINED')
 
 class Variable(Statement):
     def __init__(self, pos, body):
@@ -884,6 +930,16 @@ class Variable(Statement):
 
     def emit(self, bytecode):
         self.body.emit(bytecode)
+
+class Import(Statement):
+    def __init__(self, pos, moduleVars, moduleName):
+        self.pos = pos
+        self.moduleVars = moduleVars
+        self.moduleName = moduleName
+
+    def emit(self, bytecode):
+        self.moduleVars.emit(bytecode)
+        self.moduleName.emit(bytecode)
 
 
 class Empty(Expression):

@@ -221,6 +221,11 @@ class JsCode(object):
             if pc >= self._opcode_count():
                 break
             opcode = self._get_opcode(pc)
+            
+            
+            print opcode
+            
+            
             result = opcode.eval(ctx)
 
             if debug:
