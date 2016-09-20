@@ -1,8 +1,10 @@
 from rpython.rlib.rfloat import NAN, isnan
 
-from js.builtins import get_arg
-from js.object_space import w_return, _w
+from js.builtins import get_arg, put_property, put_native_function
+from js.object_space import w_return, _w, object_space
 from js import rtime
+from js.wrappers.jsobj import W_DateObject, W_DateConstructor
+
 
 fMSEC = 1
 fSEC = 2
@@ -14,10 +16,6 @@ fYEAR = 3
 
 
 def setup(global_object):
-    from js.builtins import put_property, put_native_function
-    from js.jsobj import W_DateObject, W_DateConstructor
-    from js.object_space import object_space
-
     ##Date
     # 15.9.5
     w_DatePrototype = W_DateObject(_w(NAN))
@@ -258,7 +256,6 @@ def _assert_date(obj):
 @w_return
 def set_time(this, args):
     _assert_date(this)
-    from js.jsobj import W_DateObject
     assert isinstance(this, W_DateObject)
     arg0 = get_arg(args, 0)
     this._primitive_value_ = arg0

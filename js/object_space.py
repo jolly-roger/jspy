@@ -1,43 +1,42 @@
 from rpython.rlib.objectmodel import specialize, enforceargs
 from rpython.rlib import jit
+from rpython.rlib.objectmodel import we_are_translated
+
+from js.wrappers.jsobj import W_IntNumber, W_String, W_FloatNumber, W_IntNumber, W_Boolean, W_Undefined, W_Null, W_Root, \
+    put_property, \
+    W_NumericObject, W_StringObject, W_BasicFunction, W_DateObject, W_BooleanObject, \
+    W__Array, W__Function, W__Object
 
 
 def isint(w):
-    from js.jsobj import W_IntNumber
     return isinstance(w, W_IntNumber)
 
 
 def isstr(w):
-    from js.jsobj import W_String
     return isinstance(w, W_String)
 
 
 def isfloat(w):
-    from js.jsobj import W_FloatNumber
     return isinstance(w, W_FloatNumber)
 
 
 @enforceargs(int)
 def newint(i):
-    from js.jsobj import W_IntNumber
     return W_IntNumber(i)
 
 
 @enforceargs(float)
 def newfloat(f):
-    from js.jsobj import W_FloatNumber
     return W_FloatNumber(f)
 
 
 @enforceargs(unicode)
 def newstring(s):
-    from js.jsobj import W_String
     return W_String(s)
 
 
 @enforceargs(bool)
 def _makebool(b):
-    from js.jsobj import W_Boolean
     return W_Boolean(b)
 
 
@@ -50,7 +49,6 @@ jit.promote(w_False)
 
 
 def _makeundefined():
-    from js.jsobj import W_Undefined
     return W_Undefined()
 
 w_Undefined = _makeundefined()
@@ -58,7 +56,6 @@ jit.promote(w_Undefined)
 
 
 def _makenull():
-    from js.jsobj import W_Null
     return W_Null()
 
 w_Null = _makenull()
@@ -96,7 +93,6 @@ def newbool(val):
 
 @specialize.argtype(0)
 def _w(value):
-    from js.jsobj import W_Root, put_property
     if value is None:
         return newnull()
     elif isinstance(value, W_Root):
@@ -138,7 +134,6 @@ class ObjectSpace(object):
         return self.global_context.variable_environment()
 
     def assign_proto(self, obj, proto=None):
-        from js.jsobj import W_BasicFunction, W_DateObject, W_BooleanObject, W_StringObject, W_NumericObject, W__Array
         if proto is not None:
             obj._prototype_ = proto
             return obj
@@ -160,43 +155,36 @@ class ObjectSpace(object):
         return obj
 
     def new_obj(self):
-        from js.jsobj import W__Object
         obj = W__Object()
         self.assign_proto(obj)
         return obj
 
     def new_func(self, function_body, formal_parameter_list=[], scope=None, strict=False):
-        from js.jsobj import W__Function
         obj = W__Function(function_body, formal_parameter_list, scope, strict)
         self.assign_proto(obj)
         return obj
 
     def new_date(self, value):
-        from js.jsobj import W_DateObject
         obj = W_DateObject(value)
         self.assign_proto(obj)
         return obj
 
     def new_array(self, length=_w(0)):
-        from js.jsobj import W__Array
         obj = W__Array(length)
         self.assign_proto(obj)
         return obj
 
     def new_bool(self, value):
-        from js.jsobj import W_BooleanObject
         obj = W_BooleanObject(value)
         self.assign_proto(obj)
         return obj
 
     def new_string(self, value):
-        from js.jsobj import W_StringObject
         obj = W_StringObject(value)
         self.assign_proto(obj)
         return obj
 
     def new_number(self, value):
-        from js.jsobj import W_NumericObject
         obj = W_NumericObject(value)
         self.assign_proto(obj)
         return obj
@@ -216,7 +204,6 @@ def hide_on_translate(*args):
 
     def _wrap(f):
         def _wrapped_f(*args):
-            from rpython.rlib.objectmodel import we_are_translated
             if not we_are_translated():
                 return f(*args)
 

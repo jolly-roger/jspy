@@ -1,12 +1,10 @@
-from js.builtins import get_arg
-from js.object_space import w_return, _w, isnull_or_undefined, newundefined
+from js.builtins import get_arg, put_property, put_native_function
+from js.object_space import w_return, _w, isnull_or_undefined, newundefined, object_space
+
+from js.wrappers.jsobj import W_ArrayConstructor, W__Array, put_property, W_BasicFunction, W_IntNumber
 
 
 def setup(global_object):
-    from js.builtins import put_property, put_native_function
-    from js.jsobj import W_ArrayConstructor, W__Array
-    from js.object_space import object_space
-
     w_Array = W_ArrayConstructor()
     object_space.assign_proto(w_Array, object_space.proto_function)
     put_property(global_object, u'Array', w_Array)
@@ -58,7 +56,6 @@ def slice(this, args):
     to_index = get_arg(args, 1).ToUInt32()
     from js.object_space import object_space
     n = object_space.new_array(length=_w(to_index-from_index))
-    from js.jsobj import put_property
     index = 0
     for item in xrange(from_index, to_index):
         put_property(n, unicode(str(index)), o.get(unicode(str(item))))
@@ -89,7 +86,6 @@ def to_string(this, args):
     array = this.ToObject()
     func = array.get(u'join')
     if func.is_callable():
-        from js.jsobj import W_BasicFunction
         assert isinstance(func, W_BasicFunction)
         return func.Call(this=this).to_string()
     else:
@@ -220,7 +216,6 @@ def last_index_of(this, args):
         else:
             from_index = findex
 
-    from js.jsobj import W_IntNumber
     for i in xrange(from_index, -1, -1):
         y = obj.get(unicode(str(i)))
         if elem == y:
@@ -235,7 +230,6 @@ def index_of(this, args):
     elem = get_arg(args, 0)
     from_index = get_arg(args, 1).ToUInt32()
 
-    from js.jsobj import W_IntNumber
     for i in xrange(from_index, length):
         y = obj.get(unicode(str(i)))
         if elem == y:
@@ -248,7 +242,6 @@ def for_each(this, args):
     length = this.get(u'length').ToUInt32()
 
     callback = get_arg(args, 0)
-    from js.jsobj import W_BasicFunction
     assert isinstance(callback, W_BasicFunction)
 
     for i in xrange(length):
@@ -314,8 +307,7 @@ def sort_compare(obj, j, k, comparefn=newundefined()):
         if not comparefn.is_callable():
             from js.exception import JsTypeError
             raise JsTypeError(u'')
-
-        from js.jsobj import W_BasicFunction
+        
         assert isinstance(comparefn, W_BasicFunction)
         res = comparefn.Call(args=[x, y], this=newundefined())
         return res.ToInteger()

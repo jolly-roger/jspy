@@ -1,5 +1,9 @@
 from rpython.rlib.streamio import open_file_as_stream
 
+from js.wrappers.jsobj import W_GlobalObject
+from js.object_space import object_space
+import js.builtins.interpreter
+
 
 def load_file(filename):
     f = open_file_as_stream(str(filename))
@@ -15,10 +19,6 @@ class InterpreterConfig(object):
 class Interpreter(object):
     """Creates a js interpreter"""
     def __init__(self, config={}):
-        from js.jsobj import W_GlobalObject
-        from js.object_space import object_space
-        import js.builtins.interpreter
-
         self.config = InterpreterConfig(config)
         self.global_object = W_GlobalObject()
         object_space.global_object = self.global_object

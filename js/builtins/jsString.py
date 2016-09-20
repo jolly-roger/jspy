@@ -1,19 +1,15 @@
 from rpython.rlib.rfloat import NAN
 from rpython.rlib.rstring import UnicodeBuilder
 
-from js.jsobj import W_String, W_StringObject
 from js.exception import JsTypeError
-from js.builtins import get_arg
-from js.object_space import w_return, _w
+from js.builtins import get_arg, put_native_function, put_property
+from js.object_space import w_return, _w, object_space
+from js.wrappers.jsobj import W_String, W_StringObject, W_StringConstructor
 
 
 def setup(global_object):
-    from js.builtins import put_native_function, put_property
-    from js.object_space import object_space
-
     #String
     # 15.5.1
-    from js.jsobj import W_StringConstructor
     w_String = W_StringConstructor()
     object_space.assign_proto(w_String, object_space.proto_function)
     put_property(w_String, u'length', _w(1), writable=False, enumerable=False, configurable=False)

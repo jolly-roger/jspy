@@ -1,7 +1,15 @@
 import importlib
 
-from .wrappers.pyobj import PyObj
-from .jsobj import W_String
+from js.wrappers.pyobj import PyObj
+from js.wrappers.jsobj import W_String, W_List, W_BasicObject, int32, W_BasicFunction, W_Iterator, \
+    put_property
+
+
+
+
+
+
+from js.object_space import newbool
 
 
 from rpython.rlib.rarithmetic import intmask
@@ -10,7 +18,6 @@ from rpython.rlib import jit
 from js.object_space import _w, isint
 from js.exception import JsTypeError
 from js.baseop import plus, sub, AbstractEC, StrictEC, increment, decrement, mult, division, uminus, mod
-from js.jsobj import put_property
 
 
 class Opcode(object):
@@ -199,7 +206,6 @@ class LOAD_LIST(Opcode):
         self.counter = counter
 
     def eval(self, ctx):
-        from js.jsobj import W_List
         list_w = ctx.stack_pop_n(self.counter)  # [:] # pop_n returns a non-resizable list
         ctx.stack_append(W_List(list_w))
 
@@ -295,8 +301,6 @@ class SUB(BaseBinaryOperation):
 
 class IN(BaseBinaryOperation):
     def operation(self, ctx, left, right):
-        from js.jsobj import W_BasicObject
-        from js.object_space import newbool
         if not isinstance(right, W_BasicObject):
             raise JsTypeError(u"TypeError: fffuuu!")  # + repr(right)
         name = left.to_string()
@@ -410,7 +414,6 @@ class RSH(BaseBinaryBitwiseOp):
 
 class LSH(BaseBinaryBitwiseOp):
     def eval(self, ctx):
-        from js.jsobj import int32
         rval = ctx.stack_pop()
         lval = ctx.stack_pop()
 
@@ -697,7 +700,6 @@ def common_call(ctx, funcobj, args, this, identifyer):
         err = u"%s is not a callable (%s)" % (funcobj.to_string(), identifyer.to_string())
         raise JsTypeError(err)
 
-    from js.jsobj import W_List, W_BasicFunction
     assert isinstance(args, W_List)
     assert isinstance(funcobj, W_BasicFunction)
 
@@ -817,7 +819,6 @@ def commonnew(ctx, obj, args):
         msg = u'%s is not a constructor' % (obj.to_string())
         raise JsTypeError(msg)
 
-    from js.jsobj import W_BasicFunction
     assert isinstance(obj, W_BasicFunction)
     res = obj.Construct(args=args)
     return res
@@ -827,8 +828,6 @@ class NEW(Opcode):
     _stack_change = 0
 
     def eval(self, ctx):
-        from js.jsobj import W_List
-
         y = ctx.stack_pop()
         x = ctx.stack_pop()
         assert isinstance(y, W_List)
@@ -867,7 +866,6 @@ class LOAD_ITERATOR(Opcode):
 
         props.reverse()
 
-        from js.jsobj import W_Iterator
         iterator = W_Iterator(props)
         return iterator
 
@@ -875,7 +873,6 @@ class LOAD_ITERATOR(Opcode):
         exper_value = ctx.stack_pop()
         obj = exper_value.ToObject()
 
-        from js.jsobj import W_BasicObject
         assert isinstance(obj, W_BasicObject)
 
         iterator = self._make_iterator(obj)
@@ -888,7 +885,6 @@ class JUMP_IF_ITERATOR_EMPTY(BaseJump):
         pass
 
     def do_jump(self, ctx, pos):
-        from js.jsobj import W_Iterator
         last_block_value = ctx.stack_pop()
         iterator = ctx.stack_top()
         assert isinstance(iterator, W_Iterator)
@@ -908,8 +904,6 @@ class NEXT_ITERATOR(Opcode):
     _stack_change = 0
 
     def eval(self, ctx):
-        from js.jsobj import W_Iterator
-
         iterator = ctx.stack_top()
         assert isinstance(iterator, W_Iterator)
         next_el = iterator.next()
@@ -992,7 +986,6 @@ class INSTANCEOF(Opcode):
     def eval(self, ctx):
         rval = ctx.stack_pop()
         lval = ctx.stack_pop()
-        from js.jsobj import W_BasicObject
         if not isinstance(rval, W_BasicObject):
             raise JsTypeError(u'TypeError')
         res = rval.has_instance(lval)

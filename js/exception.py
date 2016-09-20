@@ -46,8 +46,6 @@ class JsException(Exception):
 
 class JsThrowException(JsException):
     def __init__(self, value):
-        from js.jsobj import W_Root
-        assert isinstance(value, W_Root)
         self.value = value
 
     def _msg(self):

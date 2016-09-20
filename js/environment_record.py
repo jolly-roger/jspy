@@ -1,4 +1,6 @@
 from js.object_map import new_map
+from js.wrappers.jsobj import PropertyDescriptor
+from js.object_space import newundefined
 
 
 class EnvironmentRecord(object):
@@ -170,8 +172,6 @@ class ObjectEnvironmentRecord(EnvironmentRecord):
         else:
             config_value = True
 
-        from js.jsobj import PropertyDescriptor
-        from js.object_space import newundefined
         desc = PropertyDescriptor(value=newundefined(), writable=True, enumerable=True, configurable=config_value)
         bindings.define_own_property(n, desc, True)
 

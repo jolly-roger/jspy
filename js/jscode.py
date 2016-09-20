@@ -4,7 +4,7 @@ from rpython.rlib import jit
 
 from js.exception import JsThrowException
 from js.opcodes import opcodes, LABEL, BaseJump
-from js.jsobj import W_String
+from js.wrappers.jsobj import W_String
 
 
 def get_printable_location(pc, debug, jscode):

@@ -1,15 +1,11 @@
 from rpython.rlib.rfloat import NAN, INFINITY
 from js.exception import JsRangeError, JsTypeError
-from js.jsobj import W_Number, W_NumericObject
-from js.object_space import w_return, _w
+from js.wrappers.jsobj import W_Number, W_NumericObject, W_NumberConstructor
+from js.object_space import w_return, _w, object_space
+from js.builtins import put_property, put_native_function
 
 
 def setup(global_object):
-    from js.builtins import put_property, put_native_function
-    from js.object_space import object_space
-
-    # 15.7.2
-    from js.jsobj import W_NumberConstructor
     w_Number = W_NumberConstructor()
     object_space.assign_proto(w_Number, object_space.proto_function)
     put_property(global_object, u'Number', w_Number)

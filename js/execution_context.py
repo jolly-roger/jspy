@@ -1,5 +1,9 @@
 from js.utils import StackMixin
 from js.object_space import newundefined
+from js.wrappers.jsobj import W_Arguments, W_BasicObject
+from js.object_space import object_space, isnull_or_undefined
+
+
 from rpython.rlib import jit
 
 
@@ -100,7 +104,6 @@ class ExecutionContext(StackMixin):
         arguments_already_declared = env.has_binding(u'arguments')
         # 7.
         if code.is_function_code() and arguments_already_declared is False:
-            from js.jsobj import W_Arguments
             # TODO get calling W_Function
             func = self._w_func_
             arguments = self._argument_values_
@@ -217,9 +220,6 @@ class FunctionExecutionContext(ExecutionContext):
     _immutable_fields_ = ['_scope_', '_calling_context_']
 
     def __init__(self, code, formal_parameters=[], argv=[], this=newundefined(), strict=False, scope=None, w_func=None):
-        from js.jsobj import W_BasicObject
-        from js.object_space import object_space, isnull_or_undefined
-
         stack_size = code.estimated_stack_size()
         env_size = code.env_size() + 1  # neet do add one for the arguments object
 

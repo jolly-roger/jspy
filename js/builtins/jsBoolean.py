@@ -1,14 +1,11 @@
-from js.jsobj import W_Boolean, W_BooleanObject
+from js.wrappers.jsobj import W_Boolean, W_BooleanObject, W_BooleanConstructor
 from js.exception import JsTypeError
 from js.object_space import w_return, _w
+from js.builtins import put_property, put_native_function
+from js.object_space import object_space
 
 
 def setup(global_object):
-    from js.builtins import put_property, put_native_function
-    from js.object_space import object_space
-
-    # 15.6.2
-    from js.jsobj import W_BooleanConstructor
     w_Boolean = W_BooleanConstructor()
     object_space.assign_proto(w_Boolean, object_space.proto_function)
     put_property(global_object, u'Boolean', w_Boolean)

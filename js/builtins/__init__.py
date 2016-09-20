@@ -1,4 +1,6 @@
-from js.object_space import _w
+from js.object_space import _w, object_space
+
+from js.wrappers.jsobj import put_property as _put_property, W_BasicObject, W_FunctionConstructor, W_ObjectConstructor
 
 
 def new_native_function(function, name=u'', params=[]):
@@ -22,18 +24,12 @@ def put_intimate_function(obj, name, func, writable=True, configurable=True, enu
     put_property(obj, name, w_func, writable=writable, configurable=configurable, enumerable=enumerable)
 
 def put_property(obj, name, value, writable=True, configurable=True, enumerable=False):
-    from js.jsobj import put_property as _put_property
     _put_property(obj, name, value, writable, configurable, enumerable)
 
 
 def setup_builtins(global_object):
-    from js.object_space import object_space
-
-    from js.jsobj import W_BasicObject
     w_ObjectPrototype = W_BasicObject()
     object_space.proto_object = w_ObjectPrototype
-
-    from js.jsobj import W_FunctionConstructor
     w_Function = W_FunctionConstructor()
     put_property(global_object, u'Function', w_Function)
 
@@ -47,7 +43,6 @@ def setup_builtins(global_object):
 
     object_space.assign_proto(w_Function, object_space.proto_function)
 
-    from js.jsobj import W_ObjectConstructor
     w_Object = W_ObjectConstructor()
     object_space.assign_proto(w_Object, object_space.proto_function)
 

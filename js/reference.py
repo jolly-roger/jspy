@@ -1,5 +1,6 @@
 from js.exception import JsReferenceError
-#from pypy.rlib import jit
+
+from js.wrappers.jsobj import W_Boolean, W_String, W_Number, W_BasicObject
 
 
 class Reference(object):
@@ -25,13 +26,11 @@ class Reference(object):
 
     def has_primitive_base(self):
         b = self.base_value
-        from js.jsobj import W_Boolean, W_String, W_Number
         if isinstance(b, W_Boolean) or isinstance(b, W_String) or isinstance(b, W_Number):
             return True
         return False
 
     def is_property_reference(self):
-        from js.jsobj import W_BasicObject
         if isinstance(self.base_value, W_BasicObject) or self.has_primitive_base() is True:
             return True
         return False

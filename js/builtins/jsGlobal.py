@@ -2,18 +2,24 @@
 
 from rpython.rlib.rfloat import NAN, INFINITY, isnan, isinf
 from js.builtins import get_arg
-from js.object_space import w_return
+from js.object_space import w_return, newundefined
 from rpython.rlib.unicodedata import unicodedb
+from rpython.rlib.parsing.parsing import ParseError
+from rpython.rlib.parsing.deterministic import LexerError
+from rpython.rlib.objectmodel import we_are_translated
+
+from js.astbuilder import parse_to_ast
+from js.jscode import ast_to_bytecode
+from js.wrappers.jsobj import W_String
+from js.functions import JsEvalCode
+from js.execution_context import EvalExecutionContext
+from js.astbuilder import FakeParseError
+from js.exception import JsSyntaxError
+from js.builtins import put_intimate_function, put_native_function, put_property
+from js.builtins.jsNumber import w_NAN, w_POSITIVE_INFINITY
 
 
 def setup(global_object):
-    from rpython.rlib.objectmodel import we_are_translated
-    from js.builtins import put_intimate_function, put_native_function, put_property
-    from js.builtins.number import w_NAN
-    from js.builtins.number import w_POSITIVE_INFINITY
-    from js.object_space import newundefined
-
-    # 15.1.1.1
     put_property(global_object, u'NaN', w_NAN, writable=False, enumerable=False, configurable=False)
 
     # 15.1.1.2
@@ -349,17 +355,6 @@ def version(this, args):
 
 # 15.1.2.1
 def js_eval(ctx):
-    from rpython.rlib.parsing.parsing import ParseError
-    from rpython.rlib.parsing.deterministic import LexerError
-
-    from js.astbuilder import parse_to_ast
-    from js.jscode import ast_to_bytecode
-    from js.jsobj import W_String
-    from js.functions import JsEvalCode
-    from js.execution_context import EvalExecutionContext
-    from js.astbuilder import FakeParseError
-    from js.exception import JsSyntaxError
-
     args = ctx.argv()
     x = get_arg(args, 0)
 
