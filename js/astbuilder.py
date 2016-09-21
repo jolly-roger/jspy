@@ -1,10 +1,10 @@
-from rpython.rlib.rarithmetic import ovfcheck_float_to_int
 from rpython.rlib.parsing.tree import RPythonVisitor, Symbol
-from rpython.rlib.objectmodel import enforceargs
 
 from js import operations
-
 from js.symbol_map import SymbolMap
+from js.jsparser import parse
+from js.runistr import encode_unicode_utf8, unicode_unescape, decode_str_utf8
+from js.operations import string_unquote, Identifier, Member, MemberDot
 
 
 class FakeParseError(Exception):
@@ -144,9 +144,8 @@ class ASTBuilder(RPythonVisitor):
     def visit_DECIMALLITERAL(self, node):
         pos = self.get_pos(node)
         try:
-
             f = float(node.additional_info)
-            i = ovfcheck_float_to_int(f)
+            i = f
             if i != f:
                 return operations.FloatNumber(pos, f)
             else:
@@ -166,9 +165,6 @@ class ASTBuilder(RPythonVisitor):
         return operations.IntNumber(pos, int(node.additional_info, 8))
 
     def string(self, node):
-        from js.operations import string_unquote
-        from js.runistr import unicode_unescape, decode_str_utf8
-
         # TODO decode utf-8
         pos = self.get_pos(node)
         s = node.additional_info
@@ -457,16 +453,12 @@ class ASTBuilder(RPythonVisitor):
         return left
 
     def is_identifier(self, obj):
-        from js.operations import Identifier
         return isinstance(obj, Identifier)
 
     def is_member(self, obj):
-        from js.operations import Member, MemberDot
         return isinstance(obj, Member) or isinstance(obj, MemberDot)
 
     def is_local_identifier(self, obj):
-        #from js.operations import LocalIdentifier
-        #return isinstance(obj, LocalIdentifier)
         return False
 
     def visit_assignmentexpression(self, node):
@@ -688,12 +680,7 @@ def parse_tree_to_ast(parse_tree):
     tree = builder.dispatch(parse_tree)
     return tree
 
-
-@enforceargs(unicode)
 def parse_to_ast(code):
-    #assert isinstance(code, unicode)
-    from js.jsparser import parse
-    from js.runistr import encode_unicode_utf8
     src = encode_unicode_utf8(code)
     parse_tree = parse(src)
     ast = parse_tree_to_ast(parse_tree)
