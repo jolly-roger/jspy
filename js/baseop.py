@@ -1,20 +1,11 @@
-
-""" Base operations implementations
-"""
-
 from js.wrappers.jsobj import W_String, W_IntNumber, W_FloatNumber
 from js.object_space import _w, isint, isstr, isfloat
-
-from rpython.rlib.rarithmetic import ovfcheck
-from rpython.rlib.rfloat import isnan, isinf
-from rpython.rlib.objectmodel import specialize
-
 from js.builtins.jsNumber import w_NAN, w_POSITIVE_INFINITY, w_NEGATIVE_INFINITY
 
 import math
+from math import copysign
 
 
-# 11.6.1, 11.6.3
 def plus(lval, rval):
     lprim = lval.ToPrimitive()
     rprim = rval.ToPrimitive()
@@ -28,7 +19,7 @@ def plus(lval, rval):
         ileft = lprim.ToInteger()
         iright = rprim.ToInteger()
         try:
-            return W_IntNumber(ovfcheck(ileft + iright))
+            return W_IntNumber(ileft + iright)
         except OverflowError:
             return W_FloatNumber(float(ileft) + float(iright))
     else:
@@ -57,7 +48,7 @@ def sub(ctx, nleft, nright):
         ileft = nleft.ToInt32()
         iright = nright.ToInt32()
         try:
-            return W_IntNumber(ovfcheck(ileft - iright))
+            return W_IntNumber(ileft - iright)
         except OverflowError:
             return W_FloatNumber(float(ileft) - float(iright))
     fleft = nleft.ToNumber()
@@ -71,7 +62,7 @@ def mult(ctx, nleft, nright):
         ileft = nleft.ToInteger()
         iright = nright.ToInteger()
         try:
-            return W_IntNumber(ovfcheck(ileft * iright))
+            return W_IntNumber(ileft * iright)
         except OverflowError:
             return W_FloatNumber(float(ileft) * float(iright))
     fleft = nleft.ToNumber()
@@ -83,13 +74,13 @@ def mod(ctx, w_left, w_right):
     left = w_left.ToNumber()
     right = w_right.ToNumber()
 
-    if isnan(left) or isnan(right):
+    if math.isnan(left) or math.isnan(right):
         return w_NAN
 
-    if isinf(left) or right == 0:
+    if left == float('inf') or right == 0:
         return w_NAN
 
-    if isinf(right):
+    if right == float('inf'):
         return w_left
 
     if left == 0:
@@ -99,7 +90,6 @@ def mod(ctx, w_left, w_right):
 
 
 def sign(x):
-    from math import copysign
     return copysign(1.0, x)
 
 
@@ -115,21 +105,20 @@ def w_signed_inf(sign):
     return w_POSITIVE_INFINITY
 
 
-# 11.5.2
 def division(ctx, nleft, nright):
     fleft = nleft.ToNumber()
     fright = nright.ToNumber()
-    if isnan(fleft) or isnan(fright):
+    if math.isnan(fleft) or math.isnan(fright):
         return w_NAN
 
-    if isinf(fleft) and isinf(fright):
+    if fleft == float('inf') and fright == float('inf'):
         return w_NAN
 
-    if isinf(fleft) and fright == 0:
+    if fleft == float('inf') and fright == 0:
         s = sign_of(fleft, fright)
         return w_signed_inf(s)
 
-    if isinf(fright):
+    if fright == float('inf'):
         return _w(0)
 
     if fleft == 0 and fright == 0:
@@ -142,13 +131,9 @@ def division(ctx, nleft, nright):
     val = fleft / fright
     return W_FloatNumber(val)
 
-
-@specialize.argtype(0, 1)
 def _compare_gt(x, y):
     return x > y
 
-
-@specialize.argtype(0, 1)
 def _compare_ge(x, y):
     return x >= y
 
@@ -200,7 +185,7 @@ def AbstractEC(x, y):
     if isint(x) and isint(y):
         return x.ToInteger() == y.ToInteger()
     if isinstance(x, W_FloatNumber) and isinstance(y, W_FloatNumber):
-        if isnan(x.ToNumber()) or isnan(y.ToNumber()):
+        if math.isnan(x.ToNumber()) or math.isnan(y.ToNumber()):
             return False
         return x.ToNumber() == y.ToNumber()
     type1 = x.type()
@@ -211,7 +196,7 @@ def AbstractEC(x, y):
         if type1 == "number":
             n1 = x.ToNumber()
             n2 = y.ToNumber()
-            if isnan(n1) or isnan(n2):
+            if math.isnan(n1) or math.isnan(n2):
                 return False
             if n1 == n2:
                 return True
@@ -269,7 +254,7 @@ def StrictEC(x, y):
     if type1 == "number":
         n1 = x.ToNumber()
         n2 = y.ToNumber()
-        if isnan(n1) or isnan(n2):
+        if math.isnan(n1) or math.isnan(n2):
             return False
         if n1 == n2:
             return True
