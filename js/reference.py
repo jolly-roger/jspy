@@ -1,6 +1,10 @@
 from js.exception import JsReferenceError
-
-from js.wrappers.jsobj import W_Boolean, W_String, W_Number, W_BasicObject
+from js.wrappers.number import W_Number
+from js.wrappers.string import W_String
+from js.wrappers.boolean import W_Boolean
+from js.wrappers.W_BasicObject import W_BasicObject
+from js.environment_record import EnvironmentRecord
+from js.builtins.object_space import object_space
 
 
 class Reference(object):
@@ -60,7 +64,6 @@ def get_value(v, identifier=None):
         raise NotImplementedError('8.7.1 4.')
     else:
         base_env = v.base_env
-        from js.environment_record import EnvironmentRecord
         assert isinstance(base_env, EnvironmentRecord)
         name = v.get_referenced_name(identifier)
         strict = v.is_strict_reference()
@@ -79,7 +82,6 @@ def put_value(v, w, identifier):
         else:
             name = v.get_referenced_name(identifier)
             # TODO how to solve this ????
-            from js.object_space import object_space
             global_object = object_space.global_object
 
             global_object.put(name, w, throw=False)
@@ -87,7 +89,6 @@ def put_value(v, w, identifier):
         raise NotImplementedError('8.7.2 4.')
     else:
         base_env = v.base_env
-        from js.environment_record import EnvironmentRecord
         assert isinstance(base_env, EnvironmentRecord)
         name = v.get_referenced_name(identifier)
         strict = v.is_strict_reference()

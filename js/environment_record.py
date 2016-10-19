@@ -1,6 +1,6 @@
 from js.object_map import new_map
 from js.wrappers.jsobj import PropertyDescriptor
-from js.object_space import newundefined
+from js.wrappers.undefined import newundefined
 
 
 class EnvironmentRecord(object):

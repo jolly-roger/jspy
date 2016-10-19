@@ -1,20 +1,21 @@
-from rpython.rlib.objectmodel import enforceargs
 from rpython.rlib import runicode
+from rpython.rlib.rstring import UnicodeBuilder
+from rpython.rlib.rarithmetic import r_uint
+from rpython.rlib.runicode import MAXUNICODE, UNICHR
+
+from js.exception import JsSyntaxError
 
 
-@enforceargs(str)
 def decode_str_utf8(string):
     result, consumed = runicode.str_decode_utf_8(string, len(string), "strict", True)
     return result
 
 
-@enforceargs(unicode)
 def encode_unicode_utf8(string):
     result = runicode.unicode_encode_utf_8(string, len(string), None)
     return result
 
 
-@enforceargs(str)
 def decode_unicode_escape(string):
     result, consumed = runicode.str_decode_unicode_escape(string, len(string), "strict", True)
     return result
@@ -27,16 +28,11 @@ def unescape_errorhandler(errors, encoding, msg, s, startingpos, endingpos):
     res = s[start:endingpos]
     return res, endingpos
 
-
-# based on pypy.rlib.runicode str_decode_unicode_escape
-@enforceargs(unicode)
 def unicode_unescape(string):
     s = string
     size = len(string)
     errorhandler = unescape_errorhandler
     errors = 'strict'
-
-    from rpython.rlib.rstring import UnicodeBuilder
 
     if size == 0:
         return u''
@@ -56,7 +52,6 @@ def unicode_unescape(string):
         pos += 1
         if pos >= size:
             message = u"\\ at end of string"
-            from js.exception import JsSyntaxError
             raise JsSyntaxError(message)
 
         ch = s[pos]
@@ -120,9 +115,6 @@ hexdigits = "0123456789ABCDEFabcdef"
 
 
 def hexescape(builder, s, pos, digits, encoding, errorhandler, message, errors):
-    from rpython.rlib.rarithmetic import r_uint
-    from rpython.rlib.runicode import MAXUNICODE, UNICHR
-
     chr = 0
     if pos + digits > len(s):
         message = "end of string in escape sequence"

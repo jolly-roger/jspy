@@ -1,6 +1,3 @@
-
-
-# 8.9
 class Completion(object):
     _immutable_fields_ = ['value', 'target']
 

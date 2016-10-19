@@ -1,7 +1,10 @@
 from js.utils import StackMixin
-from js.object_space import newundefined
-from js.wrappers.jsobj import W_Arguments, W_BasicObject
-from js.object_space import object_space, isnull_or_undefined
+from js.wrappers.undefined import newundefined
+from js.wrappers.W_Arguments import W_Arguments
+from js.wrappers.W_BasicObject import W_BasicObject
+from js.object_space import isnull_or_undefined
+
+from js.builtins.object_space import object_space
 
 
 from rpython.rlib import jit

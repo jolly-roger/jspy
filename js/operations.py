@@ -7,6 +7,8 @@ from rpython.rlib.unroll import unrolling_iterable
 from rpython.rlib.objectmodel import enforceargs
 
 from js.exception import JsTypeError, JsException
+from js.jscode import JsCode, ast_to_bytecode
+from js.functions import JsExecutableCode, JsFunction
 
 
 class Position(object):
@@ -349,11 +351,9 @@ class FunctionStatement(Statement):
         self.symbol_map = symbol_map
 
     def emit(self, bytecode):
-        from jscode import ast_to_bytecode
         body_code = ast_to_bytecode(self.body_ast, self.symbol_map)
         body_code.emit('LOAD_UNDEFINED')
 
-        from js.functions import JsFunction
         name = self.name
         jsfunc = JsFunction(name, body_code)
 
@@ -781,9 +781,6 @@ class Try(Statement):
         self.finallyblock = finallyblock
 
     def emit(self, bytecode):
-        from js.jscode import JsCode
-        from js.functions import JsExecutableCode
-
         trycode = JsCode()
         self.tryblock.emit(trycode)
 
@@ -973,9 +970,6 @@ class With(Statement):
         self.body = body
 
     def emit(self, bytecode):
-        from js.jscode import JsCode
-        from js.functions import JsExecutableCode
-
         self.expr.emit(bytecode)
 
         body_code = JsCode()

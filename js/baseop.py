@@ -1,5 +1,11 @@
-from js.wrappers.jsobj import W_String, W_IntNumber, W_FloatNumber
-from js.object_space import _w, isint, isstr, isfloat
+from js.wrappers.floatNumber import W_FloatNumber
+from js.wrappers.intNumber import W_IntNumber
+from js.wrappers.string import W_String
+from js.wrappers._w import _w
+from js.wrappers.intNumber import isint
+from js.wrappers.floatNumber import isfloat
+
+from js.object_space import isstr
 from js.builtins.jsNumber import w_NAN, w_POSITIVE_INFINITY, w_NEGATIVE_INFINITY
 
 import math

@@ -4,7 +4,8 @@ from rpython.rlib.rstring import UnicodeBuilder
 from js.exception import JsTypeError
 from js.builtins import get_arg, put_native_function, put_property
 from js.object_space import w_return, _w, object_space
-from js.wrappers.jsobj import W_String, W_StringObject, W_StringConstructor
+from js.wrappers.string import W_String
+from js.wrappers.jsobj import W_StringObject, W_StringConstructor
 
 
 def setup(global_object):

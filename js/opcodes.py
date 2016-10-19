@@ -1,23 +1,33 @@
 import importlib
 
+from js.wrappers._w import _w
 from js.wrappers.pyobj import PyObj
-from js.wrappers.jsobj import W_String, W_List, W_BasicObject, int32, W_BasicFunction, W_Iterator, \
-    put_property
+from js.wrappers.string import W_String
+from js.wrappers.W_List import W_List
+from js.wrappers.W_BasicObject import W_BasicObject
+from js.wrappers.W_BasicFunction import W_BasicFunction
+from js.wrappers.int import int32
+from js.wrappers.intNumber import isint, newint
+from js.wrappers.floatNumber import newfloat
+from js.wrappers.undefined import newundefined
+from js.wrappers.null import newnull
+from js.wrappers.W_Iterator import W_Iterator
 
+from js.builtins import put_property
+from js.builtins.object_space import object_space
 
-
-
-
-
-from js.object_space import newbool
-
+from js.object_space import newbool, newbool, newstring
 
 from rpython.rlib.rarithmetic import intmask
 from rpython.rlib import jit
+from rpython.rlib.listsort import make_timsort_class
 
-from js.object_space import _w, isint
-from js.exception import JsTypeError
-from js.baseop import plus, sub, AbstractEC, StrictEC, increment, decrement, mult, division, uminus, mod
+from js.exception import JsTypeError, JsThrowException, JsException, JsSyntaxError
+from js.baseop import plus, sub, AbstractEC, StrictEC, increment, decrement, mult, division, uminus, mod, compare_gt, compare_ge, compare_lt, \
+    compare_le
+from js.completion import ReturnCompletion, is_return_completion, is_completion, NormalCompletion
+from js.execution_context import CatchExecutionContext, WithExecutionContext
+from js.reference import Reference
 
 
 class Opcode(object):
@@ -44,7 +54,6 @@ class BaseBinaryComparison(Opcode):
     _stack_change = 0
 
     def eval(self, ctx):
-        from js.object_space import newbool
         s4 = ctx.stack_pop()
         s2 = ctx.stack_pop()
         res = self.decision(s2, s4)
@@ -83,7 +92,6 @@ class LOAD_INTCONSTANT(Opcode):
     _immutable_fields_ = ['w_intvalue']
 
     def __init__(self, value):
-        from js.object_space import newint
         self.w_intvalue = newint(int(value))
 
     def eval(self, ctx):
@@ -97,7 +105,6 @@ class LOAD_BOOLCONSTANT(Opcode):
     _immutable_fields_ = ['w_boolval']
 
     def __init__(self, value):
-        from js.object_space import newbool
         self.w_boolval = newbool(value)
 
     def eval(self, ctx):
@@ -113,7 +120,6 @@ class LOAD_FLOATCONSTANT(Opcode):
     _immutable_fields_ = ['w_floatvalue']
 
     def __init__(self, value):
-        from js.object_space import newfloat
         self.w_floatvalue = newfloat(float(value))
 
     def eval(self, ctx):
@@ -127,7 +133,6 @@ class LOAD_STRINGCONSTANT(Opcode):
     _immutable_fields_ = ['w_strval']
 
     def __init__(self, value):
-        from js.object_space import newstring
         self.w_strval = newstring(value)
 
     def eval(self, ctx):
@@ -140,13 +145,11 @@ class LOAD_STRINGCONSTANT(Opcode):
 
 class LOAD_UNDEFINED(Opcode):
     def eval(self, ctx):
-        from js.object_space import newundefined
         ctx.stack_append(newundefined())
 
 
 class LOAD_NULL(Opcode):
     def eval(self, ctx):
-        from js.object_space import newnull
         ctx.stack_append(newnull())
 
 
@@ -184,7 +187,6 @@ class LOAD_ARRAY(Opcode):
 
     @jit.unroll_safe
     def eval(self, ctx):
-        from js.object_space import object_space
         array = object_space.new_array()
 
         list_w = ctx.stack_pop_n(self.counter)  # [:] # pop_n returns a non-resizable list
@@ -222,10 +224,7 @@ class LOAD_FUNCTION(Opcode):
     def __init__(self, funcobj):
         self.funcobj = funcobj
 
-    # 13.2 Creating Function Objects
     def eval(self, ctx):
-        from js.object_space import object_space
-
         func = self.funcobj
         scope = ctx.lexical_environment()
         params = func.params()
@@ -246,7 +245,6 @@ class LOAD_OBJECT(Opcode):
 
     @jit.unroll_safe
     def eval(self, ctx):
-        from js.object_space import object_space
         w_obj = object_space.new_obj()
         for _ in range(self.counter):
             top = ctx.stack_pop()
@@ -331,7 +329,6 @@ class TYPEOF_VARIABLE(Opcode):
         self.name = name
 
     def eval(self, ctx):
-        from js.object_space import newstring
         ref = ctx.get_ref(self.name, self.index)
         if ref.is_unresolvable_reference():
             var_type = u'undefined'
@@ -353,26 +350,22 @@ class ADD(BaseBinaryOperation):
 
 class BITAND(BaseBinaryBitwiseOp):
     def operation(self, ctx, op1, op2):
-        from js.object_space import newint
         return newint(op1 & op2)
 
 
 class BITXOR(BaseBinaryBitwiseOp):
     def operation(self, ctx, op1, op2):
-        from js.object_space import newint
         return newint(op1 ^ op2)
 
 
 class BITOR(BaseBinaryBitwiseOp):
     def operation(self, ctx, op1, op2):
-        from js.object_space import newint
         return newint(op1 | op2)
 
 
 class BITNOT(BaseUnaryOperation):
     def eval(self, ctx):
         op = ctx.stack_pop().ToInt32()
-        from js.object_space import newint
         ctx.stack_append(newint(~op))
 
 
@@ -383,8 +376,6 @@ class URSH(BaseBinaryBitwiseOp):
 
         rnum = rval.ToUInt32()
         lnum = lval.ToUInt32()
-
-        #from rpython.rlib.rarithmetic import ovfcheck_float_to_int
 
         shift_count = rnum & 0x1F
         res = lnum >> shift_count
@@ -492,28 +483,24 @@ class DECR(BaseUnaryOperation):
 
 class GT(BaseBinaryComparison):
     def decision(self, op1, op2):
-        from js.baseop import compare_gt
         res = compare_gt(op1, op2)
         return res
 
 
 class GE(BaseBinaryComparison):
     def decision(self, op1, op2):
-        from js.baseop import compare_ge
         res = compare_ge(op1, op2)
         return res
 
 
 class LT(BaseBinaryComparison):
     def decision(self, op1, op2):
-        from js.baseop import compare_lt
         res = compare_lt(op1, op2)
         return res
 
 
 class LE(BaseBinaryComparison):
     def decision(self, op1, op2):
-        from js.baseop import compare_le
         res = compare_le(op1, op2)
         return res
 
@@ -683,7 +670,6 @@ class RETURN(Opcode):
     _stack_change = 0
 
     def eval(self, ctx):
-        from js.completion import ReturnCompletion
         value = ctx.stack_top()
         return ReturnCompletion(value)
 
@@ -742,7 +728,6 @@ class THROW(Opcode):
 
     def eval(self, ctx):
         val = ctx.stack_pop()
-        from js.exception import JsThrowException
         raise JsThrowException(val)
 
 
@@ -770,9 +755,6 @@ class TRYCATCHBLOCK(Opcode):
         return trystack + catchstack + finallystack
 
     def eval(self, ctx):
-        from js.completion import is_return_completion, is_completion, NormalCompletion
-        from js.exception import JsException
-
         tryexec = self.tryexec
         catchexec = self.catchexec
         finallyexec = self.finallyexec
@@ -787,7 +769,6 @@ class TRYCATCHBLOCK(Opcode):
         except JsException, e:
             ctx._set_stack_pointer(stack_p)
             if catchexec is not None:
-                from js.execution_context import CatchExecutionContext
                 msg = e.msg()
                 catch_ctx = CatchExecutionContext(catchexec, catchparam, msg, ctx)
                 res = catchexec.run(catch_ctx)
@@ -846,7 +827,6 @@ class NEW_NO_ARGS(Opcode):
 
 # ------------ iterator support ----------------
 
-from rpython.rlib.listsort import make_timsort_class
 TimSort = make_timsort_class()
 
 
@@ -922,9 +902,6 @@ class WITH(Opcode):
         self.body = body
 
     def eval(self, ctx):
-        from js.completion import is_return_completion
-        from execution_context import WithExecutionContext
-        # 12.10
         expr = ctx.stack_pop()
         expr_obj = expr.ToObject()
 
@@ -947,10 +924,6 @@ class DELETE(Opcode):
         self.index = index
 
     def eval(self, ctx):
-        from js.reference import Reference
-        from js.exception import JsSyntaxError
-
-        # 11.4.1
         ref = ctx.get_ref(self.name, self.index)
         if not isinstance(ref, Reference):
             res = True

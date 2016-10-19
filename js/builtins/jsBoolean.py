@@ -1,4 +1,5 @@
-from js.wrappers.jsobj import W_Boolean, W_BooleanObject, W_BooleanConstructor
+from js.wrappers.boolean import W_Boolean
+from js.wrappers.jsobj import W_BooleanObject, W_BooleanConstructor
 from js.exception import JsTypeError
 from js.object_space import w_return, _w
 from js.builtins import put_property, put_native_function

@@ -1,10 +1,8 @@
-#from pypy.rlib.jit import hint
-#from pypy.rlib.objectmodel import we_are_translated
 from rpython.rlib import jit
 
 from js.exception import JsThrowException
 from js.opcodes import opcodes, LABEL, BaseJump
-from js.wrappers.jsobj import W_String
+from js.wrappers.string import W_String
 
 
 def get_printable_location(pc, debug, jscode):

@@ -1,11 +1,13 @@
-from js.object_space import _w, object_space
+from .object_space import object_space
 
-from js.wrappers.jsobj import put_property as _put_property, W_BasicObject, W_FunctionConstructor, W_ObjectConstructor
-
+from js.wrappers._w import _w
+from js.wrappers.W_BasicObject import W_BasicObject
+from js.wrappers.W_FunctionConstructor import W_FunctionConstructor
+from js.wrappers.W_ObjectConstructor import W_ObjectConstructor
+from js.wrappers.undefined import newundefined
 
 def new_native_function(function, name=u'', params=[]):
     from js.functions import JsNativeFunction
-    from js.object_space import object_space
 
     jsfunc = JsNativeFunction(function, name)
     obj = object_space.new_func(jsfunc, formal_parameter_list=params)
@@ -17,14 +19,14 @@ def put_native_function(obj, name, func, writable=True, configurable=True, enume
 
 def put_intimate_function(obj, name, func, writable=True, configurable=True, enumerable=False, params=[]):
     from js.functions import JsIntimateFunction
-    from js.object_space import object_space
 
     jsfunc = JsIntimateFunction(func, name)
     w_func = object_space.new_func(jsfunc, formal_parameter_list=params)
     put_property(obj, name, w_func, writable=writable, configurable=configurable, enumerable=enumerable)
-
-def put_property(obj, name, value, writable=True, configurable=True, enumerable=False):
-    _put_property(obj, name, value, writable, configurable, enumerable)
+    
+def put_property(obj, name, value, writable=False, configurable=False, enumerable=False, throw=False):
+    descriptor = PropertyDescriptor(value=value, writable=writable, configurable=configurable, enumerable=enumerable)
+    obj.define_own_property(name, descriptor, throw)
 
 
 def setup_builtins(global_object):
@@ -74,9 +76,6 @@ def setup_builtins(global_object):
     jsConsole.setup(global_object)
     jsDate.setup(global_object)
     jsGlobal.setup(global_object)
-
-
-from js.object_space import newundefined
 
 
 def get_arg(args, index, default=newundefined()):

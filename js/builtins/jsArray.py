@@ -1,7 +1,8 @@
 from js.builtins import get_arg, put_property, put_native_function
 from js.object_space import w_return, _w, isnull_or_undefined, newundefined, object_space
 
-from js.wrappers.jsobj import W_ArrayConstructor, W__Array, put_property, W_BasicFunction, W_IntNumber
+from js.wrappers.jsobj import W_ArrayConstructor, W__Array, put_property, W_BasicFunction
+from js.wrappers.intNumber import W_IntNumber
 
 
 def setup(global_object):

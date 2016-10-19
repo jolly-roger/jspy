@@ -1,5 +1,5 @@
-#from rpython.rlib import jit
 from js.reference import Reference
+from js.environment_record import DeclarativeEnvironmentRecord, ObjectEnvironmentRecord
 
 
 def get_identifier_reference(lex, identifier, strict=False):
@@ -32,12 +32,10 @@ class LexicalEnvironment(object):
 class DeclarativeEnvironment(LexicalEnvironment):
     def __init__(self, outer_environment=None, env_size=0, env_resize=True):
         LexicalEnvironment.__init__(self, outer_environment)
-        from js.environment_record import DeclarativeEnvironmentRecord
         self.environment_record = DeclarativeEnvironmentRecord(env_size, env_resize)
 
 
 class ObjectEnvironment(LexicalEnvironment):
     def __init__(self, obj, outer_environment=None):
         LexicalEnvironment.__init__(self, outer_environment)
-        from js.environment_record import ObjectEnvironmentRecord
         self.environment_record = ObjectEnvironmentRecord(obj)

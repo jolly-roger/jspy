@@ -1,12 +1,12 @@
-from rpython.rlib.streamio import open_file_as_stream
+import io
 
-from js.wrappers.jsobj import W_GlobalObject
-from js.object_space import object_space
+from js.wrappers.W_GlobalObject import W_GlobalObject
+from js.builtins.object_space import object_space
 import js.builtins.interpreter
 
 
 def load_file(filename):
-    f = open_file_as_stream(str(filename))
+    f = io.open(str(filename))
     src = f.readall()
     return src
 

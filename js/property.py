@@ -1,5 +1,3 @@
-#from rpython.rlib import jit
-#from rpython.rlib.objectmodel import enforceargs
 from js.property_descriptor import PropertyDescriptor, DataPropertyDescriptor, AccessorPropertyDescriptor
 
 NOT_SET = -1

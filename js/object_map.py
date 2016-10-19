@@ -1,6 +1,3 @@
-from rpython.rlib import jit
-
-
 class Map(object):
     NOT_FOUND = -1
     _immutable_fields_ = ['index', 'back', 'name']
@@ -15,16 +12,13 @@ class Map(object):
         return "%(back)s, [%(index)d]:%(name)s" % \
             {'back': repr(self.back), 'index': self.index, 'name': self.name}
 
-    @jit.elidable_promote("0")
     def contains(self, name):
         idx = self.lookup(name)
         return self.not_found(idx) is False
 
-    @jit.elidable_promote("0")
     def not_found(self, idx):
         return idx == self.NOT_FOUND
 
-    @jit.elidable_promote("0")
     def lookup(self, name):
         node = self._find_node_with_name(name)
         if node is not None:
@@ -43,11 +37,9 @@ class Map(object):
     def empty(self):
         return True
 
-    @jit.elidable
     def len(self):
         return self.index + 1
 
-    @jit.elidable
     def add(self, name):
         assert self.lookup(name) == self.NOT_FOUND
         node = self.forward_pointers.get((name), None)
@@ -56,7 +48,6 @@ class Map(object):
             self.forward_pointers[node._key()] = node
         return node
 
-    @jit.elidable
     def keys(self):
         if self.name is None:
             return []
@@ -83,7 +74,6 @@ class MapNode(Map):
         self.name = name
         self.index = back.index + 1
 
-    @jit.elidable
     def delete(self, name):
         if self.name == name:
             return self.back

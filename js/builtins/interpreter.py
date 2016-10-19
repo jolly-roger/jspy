@@ -1,5 +1,4 @@
-from js.object_space import w_return, hide_on_translate
-#from pypy.rlib import jit
+from js.object_space import w_return
 
 
 def setup_builtins(global_object):
@@ -20,7 +19,6 @@ def js_load(this, args):
 
 
 @w_return
-@hide_on_translate
 def js_trace(this, args):
     import pdb
     pdb.set_trace()

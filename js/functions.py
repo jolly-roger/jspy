@@ -1,4 +1,4 @@
-from js.object_space import _w
+from js.wrappers._w import _w
 
 
 class JsBaseFunction(object):

@@ -1,7 +1,14 @@
 from rpython.rlib.rfloat import NAN, INFINITY
 from js.exception import JsRangeError, JsTypeError
-from js.wrappers.jsobj import W_Number, W_NumericObject, W_NumberConstructor
-from js.object_space import w_return, _w, object_space
+
+from js.wrappers._w import _w
+from js.wrappers.number import W_Number
+from js.wrappers.W_NumericObject import  W_NumericObject
+from js.wrappers.W_NumberConstructor import W_NumberConstructor
+
+from js.object_space import w_return
+
+from js.builtins.object_space import object_space
 from js.builtins import put_property, put_native_function
 
 

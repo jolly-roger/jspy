@@ -1,6 +1,3 @@
-#from pypy.rlib import jit
-
-
 def is_data_descriptor(desc):
     if desc is None:
         return False
