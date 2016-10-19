@@ -12,6 +12,7 @@ from js.wrappers.floatNumber import newfloat
 from js.wrappers.undefined import newundefined
 from js.wrappers.null import newnull
 from js.wrappers.W_Iterator import W_Iterator
+from js.wrappers.W__Object import W__Object
 
 from js.builtins import put_property
 from js.builtins.object_space import object_space
@@ -245,7 +246,7 @@ class LOAD_OBJECT(Opcode):
 
     @jit.unroll_safe
     def eval(self, ctx):
-        w_obj = object_space.new_obj()
+        w_obj = W__Object()
         for _ in range(self.counter):
             top = ctx.stack_pop()
             name = top.to_string()

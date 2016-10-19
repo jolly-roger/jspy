@@ -1,4 +1,16 @@
+from js.object_map import new_map
+from js.property_descriptor import AccessorPropertyDescriptor, is_generic_descriptor, is_data_descriptor, is_accessor_descriptor
+from js.property import AccessorProperty, DataProperty
+
 from js.wrappers.root import W_Root
+from js.wrappers.null import newnull
+from js.wrappers.W_ProtoGetter import W_ProtoGetter
+from js.wrappers.W_ProtoSetter import W_ProtoSetter
+
+
+w_proto_getter = W_ProtoGetter()
+w_proto_setter = W_ProtoSetter()
+proto_desc = AccessorPropertyDescriptor(w_proto_getter, w_proto_setter, False, False)
 
 
 class W_BasicObject(W_Root):
@@ -9,7 +21,7 @@ class W_BasicObject(W_Root):
 
     def __init__(self):
         self._property_map_ = new_map()
-        self._property_slots_ = debug.make_sure_not_resized([])
+        self._property_slots_ = []
 
         self._prototype_ = newnull()
         W_BasicObject.define_own_property(self, u'__proto__', proto_desc)

@@ -1,4 +1,8 @@
+from js.put_property import put_property
+
+from js.wrappers._w import _w
 from js.wrappers.W_BasicFunction import W_BasicFunction
+from js.wrappers.W__Object import W__Object
 
 
 class W__Function(W_BasicFunction):
@@ -17,7 +21,7 @@ class W__Function(W_BasicFunction):
         # 15.
         put_property(self, u'length', _w(_len), writable=False, enumerable=False, configurable=False)
         # 16.
-        proto_obj = object_space.new_obj()
+        proto_obj = W__Object()
         # 17.
         put_property(proto_obj, u'constructor', self, writable=True, enumerable=False, configurable=True)
         # 18.

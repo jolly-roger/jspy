@@ -1,5 +1,6 @@
 from js.wrappers._w import _w
 from js.wrappers.null import newnull
+from js.wrappers.W__Function import W__Function
 
 
 class ObjectSpace(object):
@@ -37,11 +38,6 @@ class ObjectSpace(object):
             obj._prototype_ = self.proto_date
         else:
             obj._prototype_ = self.proto_object
-        return obj
-
-    def new_obj(self):
-        obj = W__Object()
-        self.assign_proto(obj)
         return obj
 
     def new_func(self, function_body, formal_parameter_list=[], scope=None, strict=False):

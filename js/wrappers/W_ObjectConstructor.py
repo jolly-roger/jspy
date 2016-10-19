@@ -1,4 +1,5 @@
 from js.wrappers.W_BasicFunction import W_BasicFunction
+from js.wrappers.W__Object import W__Object
 
 
 class W_ObjectConstructor(W_BasicFunction):
@@ -16,7 +17,7 @@ class W_ObjectConstructor(W_BasicFunction):
 
         assert isnull_or_undefined(value)
 
-        obj = object_space.new_obj()
+        obj = W__Object()
         return obj
 
     def _to_string_(self):

@@ -2,6 +2,7 @@
 
 import os
 import sys
+import traceback
 
 from js.exception import JsException
 from js.interpreter import Interpreter, load_file
@@ -13,7 +14,7 @@ def main(argv):
     try:
         run(files, opts)
     except:
-        print(u"\n")
+        traceback.print_exc()
 
     return 0
 

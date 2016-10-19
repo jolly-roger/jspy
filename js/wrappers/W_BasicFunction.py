@@ -1,4 +1,5 @@
 from js.wrappers.W_BasicObject import W_BasicObject
+from js.wrappers.W__Object import W__Object
 
 
 class W_BasicFunction(W_BasicObject):
@@ -11,12 +12,12 @@ class W_BasicFunction(W_BasicObject):
     def Construct(self, args=[]):
         proto = self.get(u'prototype')
         if isinstance(proto, W_BasicObject):
-            obj = object_space.new_obj()
+            obj = W__Object()
             object_space.assign_proto(obj, proto)
         else:
             # would love to test this
             # but I fail to find a case that falls into this
-            obj = object_space.new_obj()
+            obj = W__Object()
 
         result = self.Call(args, this=obj)
         if isinstance(result, W__Object):

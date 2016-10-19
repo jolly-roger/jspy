@@ -1,12 +1,9 @@
 # encoding: utf-8
 from rpython.rlib.rfloat import isnan, isinf, NAN, formatd, INFINITY
 from rpython.rlib.objectmodel import enforceargs
-from rpython.rlib import jit, debug
+from rpython.rlib import jit
 
-from js.property_descriptor import PropertyDescriptor, DataPropertyDescriptor, AccessorPropertyDescriptor, is_data_descriptor, \
-    is_generic_descriptor, is_accessor_descriptor
-from js.property import DataProperty, AccessorProperty
-from js.object_map import new_map
+from js.property_descriptor import PropertyDescriptor, DataPropertyDescriptor, is_data_descriptor
 from js.exception import JsTypeError, JsRangeError
 from js.object_space import isnull_or_undefined
 from js.builtins import get_arg
@@ -80,34 +77,6 @@ class PropertyIdenfidier(object):
     def __init__(self, name, descriptor):
         self.name = name
         self.descriptor = descriptor
-
-
-class W_ProtoGetter(W_Root):
-    def is_callable(self):
-        return True
-
-    def Call(self, args=[], this=None, calling_context=None):
-        if not isinstance(this, W_BasicObject):
-            raise JsTypeError(u'')
-
-        return this._prototype_
-
-
-class W_ProtoSetter(W_Root):
-    def is_callable(self):
-        return True
-
-    def Call(self, args=[], this=None, calling_context=None):
-        if not isinstance(this, W_BasicObject):
-            raise JsTypeError(u'')
-
-        proto = args[0]
-        this._prototype_ = proto
-
-w_proto_getter = W_ProtoGetter()
-w_proto_setter = W_ProtoSetter()
-proto_desc = AccessorPropertyDescriptor(w_proto_getter, w_proto_setter, False, False)
-jit.promote(proto_desc)
 
 
 def reject(throw, msg=u''):

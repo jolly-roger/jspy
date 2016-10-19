@@ -1,9 +1,11 @@
 from js.exception import JsTypeError
 from js.builtins import get_arg
 from js.completion import NormalCompletion
-from js.object_space import w_return, _w
+from js.object_space import w_return
 
-from js.wrappers.jsobj import W_BasicFunction, W_BasicObject
+from js.wrappers._w import _w
+from js.wrappers.W_BasicFunction import W_BasicFunction
+from js.wrappers.W_BasicObject import W_BasicObject
 
 
 @w_return

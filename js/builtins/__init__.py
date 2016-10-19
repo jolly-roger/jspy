@@ -1,4 +1,6 @@
-from .object_space import object_space
+from js.put_property import put_property
+
+from js.builtins.object_space import object_space
 
 from js.wrappers._w import _w
 from js.wrappers.W_BasicObject import W_BasicObject
@@ -23,10 +25,6 @@ def put_intimate_function(obj, name, func, writable=True, configurable=True, enu
     jsfunc = JsIntimateFunction(func, name)
     w_func = object_space.new_func(jsfunc, formal_parameter_list=params)
     put_property(obj, name, w_func, writable=writable, configurable=configurable, enumerable=enumerable)
-    
-def put_property(obj, name, value, writable=False, configurable=False, enumerable=False, throw=False):
-    descriptor = PropertyDescriptor(value=value, writable=writable, configurable=configurable, enumerable=enumerable)
-    obj.define_own_property(name, descriptor, throw)
 
 
 def setup_builtins(global_object):

@@ -1,3 +1,5 @@
+from js.object_map import new_map
+
 from js.wrappers.W__Object import W__Object
 
 
@@ -10,7 +12,7 @@ class W_Arguments(W__Object):
         _len = len(args)
         put_property(self, u'length', _w(_len), writable=True, enumerable=False, configurable=True)
 
-        _map = object_space.new_obj()
+        _map = W__Object()
         mapped_names = new_map()
         indx = _len - 1
         while indx >= 0:
