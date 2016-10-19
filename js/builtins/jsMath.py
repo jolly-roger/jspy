@@ -1,14 +1,19 @@
 import math
 
 from rpython.rlib.rfloat import NAN, INFINITY, isnan, isinf
-from js.builtins import get_arg, put_native_function, put_property
-from js.object_space import w_return, _w, object_space
-from js.wrappers.jsobj import W_Math
+from js.builtins import get_arg, put_native_function
+from js.builtins.object_space import object_space
+
+from js.put_property import put_property
+
+from js.object_space import w_return
+
+from js.wrappers._w import _w
+from js.wrappers.W_Math import W_Math
 
 
 def setup(global_object):
     w_Math = W_Math()
-    object_space.assign_proto(w_Math)
     put_property(global_object, u'Math', w_Math)
 
     put_native_function(w_Math, u'abs', js_abs, params=[u'x'])

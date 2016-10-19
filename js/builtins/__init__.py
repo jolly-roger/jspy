@@ -3,6 +3,7 @@ from js.put_property import put_property
 from js.builtins.object_space import object_space
 
 from js.wrappers._w import _w
+from js.wrappers.W__Function import W__Function
 from js.wrappers.W_BasicObject import W_BasicObject
 from js.wrappers.W_FunctionConstructor import W_FunctionConstructor
 from js.wrappers.W_ObjectConstructor import W_ObjectConstructor
@@ -12,7 +13,7 @@ def new_native_function(function, name=u'', params=[]):
     from js.functions import JsNativeFunction
 
     jsfunc = JsNativeFunction(function, name)
-    obj = object_space.new_func(jsfunc, formal_parameter_list=params)
+    obj = W__Function(jsfunc, formal_parameter_list=params)
     return obj
 
 def put_native_function(obj, name, func, writable=True, configurable=True, enumerable=False, params=[]):
@@ -23,7 +24,7 @@ def put_intimate_function(obj, name, func, writable=True, configurable=True, enu
     from js.functions import JsIntimateFunction
 
     jsfunc = JsIntimateFunction(func, name)
-    w_func = object_space.new_func(jsfunc, formal_parameter_list=params)
+    w_func = W__Function(jsfunc, formal_parameter_list=params)
     put_property(obj, name, w_func, writable=writable, configurable=configurable, enumerable=enumerable)
 
 
@@ -37,7 +38,7 @@ def setup_builtins(global_object):
 
     import js.builtins.function
     empty_func = JsNativeFunction(js.builtins.function.empty, u'Empty')
-    w_FunctionPrototype = object_space.new_func(empty_func)
+    w_FunctionPrototype = W__Function(empty_func)
     object_space.assign_proto(w_FunctionPrototype, object_space.proto_object)
     object_space.proto_function = w_FunctionPrototype
 

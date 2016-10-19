@@ -6,6 +6,7 @@ from js.object_space import isnull_or_undefined
 
 from js.builtins.object_space import object_space
 
+from js.lexical_environment import ObjectEnvironment, DeclarativeEnvironment
 
 from rpython.rlib import jit
 
@@ -32,7 +33,6 @@ class ExecutionContext(StackMixin):
     def stack_top(self):
         return self._stack_top()
 
-    @jit.unroll_safe
     def stack_pop_n(self, n):
         if n < 1:
             return []
@@ -61,14 +61,10 @@ class ExecutionContext(StackMixin):
     def set_lexical_environment(self, lex_env):
         self._lexical_environment_ = lex_env
 
-    # 10.5
-    @jit.unroll_safe
     def declaration_binding_initialization(self):
-        from js.object_space import newundefined
-
         env = self._variable_environment_.environment_record
         strict = self._strict_
-        code = jit.promote(self._code_)
+        code = self._code_
 
         if code.is_eval_code():
             configurable_bindings = True
@@ -186,8 +182,6 @@ class GlobalExecutionContext(_DynamicExecutionContext):
 
         self._code_ = code
         self._strict_ = strict
-
-        from js.lexical_environment import ObjectEnvironment
         localEnv = ObjectEnvironment(global_object)
         self._lexical_environment_ = localEnv
         self._variable_environment_ = localEnv
@@ -211,7 +205,6 @@ class EvalExecutionContext(_DynamicExecutionContext):
             self._variable_environment_ = calling_context.variable_environment()
             self._lexical_environment_ = calling_context.lexical_environment()
         if self._strict_:
-            from js.lexical_environment import DeclarativeEnvironment
             strict_var_env = DeclarativeEnvironment(self._lexical_environment_)
             self._variable_environment_ = strict_var_env
             self._lexical_environment_ = strict_var_env
@@ -234,8 +227,6 @@ class FunctionExecutionContext(ExecutionContext):
         self._scope_ = scope
         self._w_func_ = w_func
         self._calling_context_ = None
-
-        from js.lexical_environment import DeclarativeEnvironment
         localEnv = DeclarativeEnvironment(scope, env_size, False)
         self._lexical_environment_ = localEnv
         self._variable_environment_ = localEnv
@@ -288,7 +279,6 @@ class WithExecutionContext(SubExecutionContext):
         self._expr_obj_ = expr_obj
         self._dynamic_refs = []
 
-        from js.lexical_environment import ObjectEnvironment
         parent_environment = parent_context.lexical_environment()
         local_env = ObjectEnvironment(expr_obj, outer_environment=parent_environment)
         local_env.environment_record.provide_this = True
@@ -312,7 +302,6 @@ class CatchExecutionContext(_DynamicExecutionContext):
 
         parent_env = parent_context.lexical_environment()
 
-        from js.lexical_environment import DeclarativeEnvironment
         local_env = DeclarativeEnvironment(parent_env)
         local_env_rec = local_env.environment_record
         local_env_rec.create_mutuable_binding(catchparam, True)

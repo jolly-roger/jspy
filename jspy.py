@@ -56,7 +56,10 @@ def repl(interpreter):
             printerrormessage(unicode(filename), e._msg())
             continue
         except Exception as e:
-            printerror(unicode(filename), e, line)
+            if hasattr(e, 'source_pos'):
+                printerror(unicode(filename), e, line)
+            else:
+                traceback.print_exc()
             continue
 
 

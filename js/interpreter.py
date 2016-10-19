@@ -1,8 +1,16 @@
 import io
 
 from js.wrappers.W_GlobalObject import W_GlobalObject
-from js.builtins.object_space import object_space
+
+from js.jscode import ast_to_bytecode, JsCode
+from js.astbuilder import parse_to_ast
+from js.runistr import decode_str_utf8
+from js.functions import JsGlobalCode
+
 import js.builtins.interpreter
+from js.builtins.object_space import object_space
+
+from js.execution_context import GlobalExecutionContext
 
 
 def load_file(filename):
@@ -27,31 +35,19 @@ class Interpreter(object):
         js.builtins.setup_builtins(self.global_object)
         js.builtins.interpreter.setup_builtins(self.global_object)
 
-        object_space.assign_proto(self.global_object)
-
     def run_ast(self, ast):
         symbol_map = ast.symbol_map
-
-        from js.jscode import ast_to_bytecode
         code = ast_to_bytecode(ast, symbol_map)
         
         return self.run(code)
 
     def run_src(self, src):
-        from js.astbuilder import parse_to_ast
-        from js.runistr import decode_str_utf8
         ast = parse_to_ast(decode_str_utf8(src))
         return self.run_ast(ast)
 
     def run(self, code, interactive=False):
-        from js.functions import JsGlobalCode
-
-        from js.jscode import JsCode
         assert isinstance(code, JsCode)
         c = JsGlobalCode(code)
-
-        from js.object_space import object_space
-        from js.execution_context import GlobalExecutionContext
 
         ctx = GlobalExecutionContext(c, self.global_object)
         object_space.global_context = ctx

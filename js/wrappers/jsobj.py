@@ -1,31 +1,17 @@
 # encoding: utf-8
 from rpython.rlib.rfloat import isnan, isinf, NAN, formatd, INFINITY
 from rpython.rlib.objectmodel import enforceargs
-from rpython.rlib import jit
 
 from js.property_descriptor import PropertyDescriptor, DataPropertyDescriptor, is_data_descriptor
 from js.exception import JsTypeError, JsRangeError
 from js.object_space import isnull_or_undefined
-from js.builtins import get_arg
-from js.astbuilder import parse_to_ast
-from js.jscode import ast_to_bytecode
-from js.execution_context import FunctionExecutionContext
 from js.completion import Completion
-from js.builtins.jsGlobal import _strip, _parse_int
 from js.runistr import encode_unicode_utf8
 from js.constants import hex_rexp, oct_rexp, num_rexp
 
 from js.wrappers.root import W_Root
 from js.wrappers.undefined import newundefined, isundefined
 from js.wrappers.null import newnull, isnull
-
-
-@jit.elidable
-def is_array_index(p):
-    return make_array_index(p) != NOT_ARRAY_INDEX
-
-
-NOT_ARRAY_INDEX = -1
 
 
 class Descr(object):
@@ -50,21 +36,6 @@ def _get_from_desc(desc, this):
     res = getter.Call(this=this)
     return res
 
-
-@jit.unroll_safe
-def make_array_index(idx):
-    if len(idx) == 0:
-        return -1
-
-    IDX_LIT = '0123456789'
-
-    for c in idx:
-        if c not in IDX_LIT:
-            return NOT_ARRAY_INDEX
-    return int(idx)
-
-
-@jit.elidable
 def sign(i):
     if i > 0:
         return 1

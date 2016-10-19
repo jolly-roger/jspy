@@ -1,4 +1,5 @@
 from js.wrappers.W_BasicObject import W_BasicObject
+from js.wrappers.root import W_Root
 
 
 class W__PrimitiveObject(W_BasicObject):

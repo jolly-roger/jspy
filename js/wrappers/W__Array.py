@@ -1,8 +1,29 @@
+from js.wrappers.jsobj import _get_from_desc
+from js.wrappers.root import W_Root
 from js.wrappers.W_BasicObject import W_BasicObject
 from js.wrappers.intNumber import W_IntNumber
 
+from js.property_descriptor import PropertyDescriptor
+
 
 w_0 = W_IntNumber(0)
+
+def is_array_index(p):
+    return make_array_index(p) != NOT_ARRAY_INDEX
+
+
+NOT_ARRAY_INDEX = -1
+
+def make_array_index(idx):
+    if len(idx) == 0:
+        return -1
+
+    IDX_LIT = '0123456789'
+
+    for c in idx:
+        if c not in IDX_LIT:
+            return NOT_ARRAY_INDEX
+    return int(idx)
 
 class W__Array(W_BasicObject):
     _class_ = 'Array'

@@ -1,4 +1,8 @@
+from js.wrappers._w import _w
 from js.wrappers.W__PrimitiveObject import W__PrimitiveObject
+from js.wrappers.W__Array import is_array_index
+
+from js.property_descriptor import PropertyDescriptor
 
 
 class W_StringObject(W__PrimitiveObject):

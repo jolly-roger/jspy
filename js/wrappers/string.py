@@ -65,3 +65,7 @@ class W_String(W_Primitive):
             return float(_parse_int(unicode(oct_lit), 8))
 
         return NAN
+
+
+def newstring(s):
+    return W_String(s)

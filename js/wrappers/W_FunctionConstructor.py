@@ -1,4 +1,5 @@
 from js.wrappers.W_BasicFunction import W_BasicFunction
+from js.wrappers.W__Function import W__Function
 
 
 class W_FunctionConstructor(W_BasicFunction):
@@ -35,7 +36,7 @@ class W_FunctionConstructor(W_BasicFunction):
         scope = object_space.get_global_environment()
         strict = func.strict
         params = func.params()
-        w_func = object_space.new_func(func, formal_parameter_list=params, scope=scope, strict=strict)
+        w_func = W__Function(func, formal_parameter_list=params, scope=scope, strict=strict)
         return w_func
 
     # TODO

@@ -4,6 +4,15 @@ from js.exception import JsThrowException
 from js.opcodes import opcodes, LABEL, BaseJump
 from js.wrappers.string import W_String
 
+from js.opcodes import POP
+from js.symbol_map import SymbolMap
+from js.opcodes import RETURN
+
+from js.builtins.object_space import object_space
+
+from js.completion import NormalCompletion, is_completion, is_return_completion, is_empty_completion
+from js.opcodes import BaseJump
+
 
 def get_printable_location(pc, debug, jscode):
     if pc < jscode._opcode_count():
@@ -28,7 +37,6 @@ def ast_to_bytecode(ast, symbol_map):
 class AlreadyRun(Exception):
     pass
 
-from js.symbol_map import SymbolMap
 empty_symbols = SymbolMap().finalize()
 
 
@@ -65,7 +73,6 @@ class JsCode(object):
     def params(self):
         return self._symbols.parameters
 
-    @jit.elidable
     def estimated_stack_size(self):
         if self._estimated_stack_size == -1:
             max_size = 0
@@ -76,7 +83,7 @@ class JsCode(object):
             assert max_size >= 0
             self._estimated_stack_size = max_size
 
-        return jit.promote(self._estimated_stack_size)
+        return self._estimated_stack_size
 
     def symbol_size(self):
         return self._symbols.len()
@@ -149,7 +156,6 @@ class JsCode(object):
         return self.emit('LOAD_INTCONSTANT', i)
 
     def unpop(self):
-        from js.opcodes import POP
         if self.opcodes and isinstance(self.opcodes[-1], POP):
             self.opcodes.pop()
             return True
@@ -157,7 +163,6 @@ class JsCode(object):
             return False
 
     def returns(self):
-        from js.opcodes import RETURN
         if self.opcodes and isinstance(self.opcodes[-1], RETURN):
             return True
         return False
@@ -191,20 +196,15 @@ class JsCode(object):
                 op.where = labels[op.where]
         self.has_labels = False
 
-    @jit.elidable
     def _get_opcode(self, pc):
         assert pc >= 0
         return self.compiled_opcodes[pc]
 
-    @jit.elidable
     def _opcode_count(self):
         return len(self.compiled_opcodes)
 
     def run(self, ctx):
-        from js.object_space import object_space
         debug = object_space.interpreter.config.debug
-        from js.completion import NormalCompletion, is_completion, is_return_completion, is_empty_completion
-        from js.opcodes import BaseJump
 
         if self._opcode_count() == 0:
             return NormalCompletion()

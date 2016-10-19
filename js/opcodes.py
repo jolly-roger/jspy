@@ -2,7 +2,8 @@ import importlib
 
 from js.wrappers._w import _w
 from js.wrappers.pyobj import PyObj
-from js.wrappers.string import W_String
+from js.wrappers.string import W_String, newstring
+from js.wrappers.boolean import newbool
 from js.wrappers.W_List import W_List
 from js.wrappers.W_BasicObject import W_BasicObject
 from js.wrappers.W_BasicFunction import W_BasicFunction
@@ -13,14 +14,12 @@ from js.wrappers.undefined import newundefined
 from js.wrappers.null import newnull
 from js.wrappers.W_Iterator import W_Iterator
 from js.wrappers.W__Object import W__Object
+from js.wrappers.W__Function import W__Function 
 
 from js.builtins import put_property
 from js.builtins.object_space import object_space
 
-from js.object_space import newbool, newbool, newstring
-
 from rpython.rlib.rarithmetic import intmask
-from rpython.rlib import jit
 from rpython.rlib.listsort import make_timsort_class
 
 from js.exception import JsTypeError, JsThrowException, JsException, JsSyntaxError
@@ -186,7 +185,6 @@ class LOAD_ARRAY(Opcode):
     def __init__(self, counter):
         self.counter = counter
 
-    @jit.unroll_safe
     def eval(self, ctx):
         array = object_space.new_array()
 
@@ -230,7 +228,7 @@ class LOAD_FUNCTION(Opcode):
         scope = ctx.lexical_environment()
         params = func.params()
         strict = func.strict
-        w_func = object_space.new_func(func, formal_parameter_list=params, scope=scope, strict=strict)
+        w_func = W__Function(func, formal_parameter_list=params, scope=scope, strict=strict)
 
         ctx.stack_append(w_func)
 
@@ -244,7 +242,6 @@ class LOAD_OBJECT(Opcode):
     def __init__(self, counter):
         self.counter = counter
 
-    @jit.unroll_safe
     def eval(self, ctx):
         w_obj = W__Object()
         for _ in range(self.counter):
@@ -834,7 +831,6 @@ TimSort = make_timsort_class()
 class LOAD_ITERATOR(Opcode):
     _stack_change = 0
 
-    # separate function because jit should trace eval but not iterator creation.
     def _make_iterator(self, obj):
         props = []
         properties = obj.named_properties()

@@ -1,8 +1,3 @@
-# encoding: utf-8
-#from pypy.rlib.jit import hint
-from rpython.rlib import jit  # , debug
-
-
 class StackMixin(object):
     _mixin_ = True
 
@@ -14,7 +9,7 @@ class StackMixin(object):
         self._stack_pointer_ = 0
 
     def _stack_pointer(self):
-        return jit.promote(self._stack_pointer_)
+        return self._stack_pointer_
 
     def _stack_pop(self):
         e = self._stack_top()

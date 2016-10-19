@@ -40,11 +40,6 @@ class ObjectSpace(object):
             obj._prototype_ = self.proto_object
         return obj
 
-    def new_func(self, function_body, formal_parameter_list=[], scope=None, strict=False):
-        obj = W__Function(function_body, formal_parameter_list, scope, strict)
-        self.assign_proto(obj)
-        return obj
-
     def new_date(self, value):
         obj = W_DateObject(value)
         self.assign_proto(obj)

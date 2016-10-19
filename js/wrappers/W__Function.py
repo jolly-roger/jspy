@@ -3,6 +3,7 @@ from js.put_property import put_property
 from js.wrappers._w import _w
 from js.wrappers.W_BasicFunction import W_BasicFunction
 from js.wrappers.W__Object import W__Object
+from js.wrappers.null import newnull
 
 
 class W__Function(W_BasicFunction):
@@ -44,7 +45,6 @@ class W__Function(W_BasicFunction):
 
     def Call(self, args=[], this=None, calling_context=None):
         code = self.code()
-        jit.promote(code)
         strict = self._strict_
         scope = self.scope()
 

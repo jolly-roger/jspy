@@ -1,9 +1,12 @@
+from js.wrappers._w import _w
 from js.wrappers.boolean import W_Boolean
-from js.wrappers.jsobj import W_BooleanObject, W_BooleanConstructor
+from js.wrappers.W_BooleanObject import W_BooleanObject
+from js.wrappers.W_BooleanConstructor import W_BooleanConstructor
+
 from js.exception import JsTypeError
-from js.object_space import w_return, _w
+from js.object_space import w_return
 from js.builtins import put_property, put_native_function
-from js.object_space import object_space
+from js.builtins.object_space import object_space
 
 
 def setup(global_object):

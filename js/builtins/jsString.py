@@ -3,9 +3,13 @@ from rpython.rlib.rstring import UnicodeBuilder
 
 from js.exception import JsTypeError
 from js.builtins import get_arg, put_native_function, put_property
-from js.object_space import w_return, _w, object_space
+from js.builtins.object_space import object_space
+from js.object_space import w_return
+
+from js.wrappers._w import _w
 from js.wrappers.string import W_String
-from js.wrappers.jsobj import W_StringObject, W_StringConstructor
+from js.wrappers.W_StringObject import W_StringObject
+from js.wrappers.W_StringConstructor import W_StringConstructor
 
 
 def setup(global_object):

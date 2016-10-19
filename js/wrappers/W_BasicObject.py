@@ -1,9 +1,10 @@
 from js.object_map import new_map
-from js.property_descriptor import AccessorPropertyDescriptor, is_generic_descriptor, is_data_descriptor, is_accessor_descriptor
+from js.property_descriptor import AccessorPropertyDescriptor, PropertyDescriptor, is_generic_descriptor, is_data_descriptor, is_accessor_descriptor
 from js.property import AccessorProperty, DataProperty
 
+from js.wrappers.jsobj import _get_from_desc
 from js.wrappers.root import W_Root
-from js.wrappers.null import newnull
+from js.wrappers.null import newnull, isnull
 from js.wrappers.W_ProtoGetter import W_ProtoGetter
 from js.wrappers.W_ProtoSetter import W_ProtoSetter
 

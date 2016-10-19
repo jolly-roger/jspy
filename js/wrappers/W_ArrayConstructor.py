@@ -1,4 +1,7 @@
+from js.wrappers._w import _w
 from js.wrappers.W_BasicFunction import W_BasicFunction
+
+from js.put_property import put_property
 
 
 class W_ArrayConstructor(W_BasicFunction):

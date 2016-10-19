@@ -1,8 +1,16 @@
-from js.builtins import get_arg, put_property, put_native_function
-from js.object_space import w_return, _w, isnull_or_undefined, newundefined, object_space
+from js.builtins import get_arg, put_native_function
+from js.builtins.object_space import object_space
 
-from js.wrappers.jsobj import W_ArrayConstructor, W__Array, put_property, W_BasicFunction
+from js.object_space import w_return, isnull_or_undefined
+
+from js.wrappers._w import _w
+from js.wrappers.W_ArrayConstructor import W_ArrayConstructor
+from js.wrappers.W__Array import W__Array
+from js.wrappers.W_BasicFunction import W_BasicFunction
 from js.wrappers.intNumber import W_IntNumber
+from js.wrappers.undefined import newundefined
+
+from js.put_property import put_property
 
 
 def setup(global_object):

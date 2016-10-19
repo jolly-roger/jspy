@@ -1,12 +1,17 @@
 from js.builtins import get_arg
-from js.object_space import w_return, _w, object_space
-from js.builtins import put_native_function, put_property
-from js.wrappers.jsobj import W_Console
+from js.object_space import w_return
+
+from js.builtins import put_native_function
+from js.builtins.object_space import object_space
+
+from js.put_property import put_property
+
+from js.wrappers._w import _w
+from js.wrappers.W_Console import W_Console
 
 
 def setup(global_object):
     w_console = W_Console()
-    object_space.assign_proto(w_console)
     put_property(global_object, u'console', w_console)
     
     put_native_function(w_console, u'log', _log)

@@ -1,6 +1,8 @@
 from js.wrappers.root import W_Root
 from js.wrappers.intNumber import newint
 from js.wrappers.floatNumber import newfloat
+from js.wrappers.boolean import newbool
+from js.wrappers.string import newstring
 
 
 def _w(value):

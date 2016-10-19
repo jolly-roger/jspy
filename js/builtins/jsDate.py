@@ -1,9 +1,16 @@
 from rpython.rlib.rfloat import NAN, isnan
 
-from js.builtins import get_arg, put_property, put_native_function
-from js.object_space import w_return, _w, object_space
+from js.builtins import get_arg, put_native_function
+from js.builtins.object_space import object_space
+
+from js.object_space import w_return
 from js import rtime
-from js.wrappers.jsobj import W_DateObject, W_DateConstructor
+
+from js.put_property import put_property
+
+from js.wrappers._w import _w
+from js.wrappers.W_DateObject import W_DateObject
+from js.wrappers.W_DateConstructor import W_DateConstructor
 
 
 fMSEC = 1

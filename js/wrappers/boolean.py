@@ -26,3 +26,16 @@ class W_Boolean(W_Primitive):
 
     def to_boolean(self):
         return self._boolval_
+
+
+def _makebool(b):
+    return W_Boolean(b)
+
+w_True = _makebool(True)
+
+w_False = _makebool(False)
+
+def newbool(val):
+    if val:
+        return w_True
+    return w_False
