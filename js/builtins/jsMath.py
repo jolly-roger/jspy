@@ -1,6 +1,6 @@
 import math
+import random
 
-from rpython.rlib.rfloat import NAN, INFINITY, isnan, isinf
 from js.builtins import get_arg, put_native_function
 from js.builtins.object_space import object_space
 
@@ -68,8 +68,8 @@ def floor(this, args):
     arg0 = get_arg(args, 0)
     x = arg0.ToNumber()
 
-    if isnan(x):
-        return NAN
+    if math.isnan(x):
+        return float('nan')
 
     return math.floor(x)
 
@@ -80,8 +80,8 @@ def js_abs(this, args):
     arg0 = get_arg(args, 0)
     x = arg0.ToNumber()
 
-    if isnan(x):
-        return NAN
+    if math.isnan(x):
+        return float('nan')
 
     return abs(x)
 
@@ -92,7 +92,7 @@ def js_round(this, args):
     arg0 = get_arg(args, 0)
     x = arg0.ToNumber()
 
-    if isnan(x):
+    if math.isnan(x):
         return x
 
     if x == 0:
@@ -104,7 +104,7 @@ def js_round(this, args):
     if x < 0 and x >= -0.5:
         return -0.0
 
-    if isinf(x):
+    if math.isinf(x):
         return x
 
     return math.floor(x + 0.5)
@@ -151,53 +151,53 @@ def js_pow(this, args):
     x = w_x.ToNumber()
     y = w_y.ToNumber()
 
-    if isnan(y):
-        return NAN
+    if math.isnan(y):
+        return float('nan')
     if y == 0:
         return 1
-    if isnan(x):
-        return NAN
-    if abs(x) > 1 and y == INFINITY:
-        return INFINITY
-    if abs(x) > 1 and y == -INFINITY:
+    if math.isnan(x):
+        return float('nan')
+    if abs(x) > 1 and y == float('inf'):
+        return float('inf')
+    if abs(x) > 1 and y == float('-inf'):
         return 0
-    if abs(x) == 1 and isinf(y):
-        return NAN
-    if abs(x) < 1 and y == INFINITY:
+    if abs(x) == 1 and math.isinf(y):
+        return float('nan')
+    if abs(x) < 1 and y == float('inf'):
         return 0
-    if abs(x) < 1 and y == -INFINITY:
-        return INFINITY
-    if x == INFINITY and y > 0:
-        return INFINITY
-    if x == INFINITY and y < 0:
+    if abs(x) < 1 and y == float('-inf'):
+        return float('inf')
+    if x == float('inf') and y > 0:
+        return float('inf')
+    if x == float('inf') and y < 0:
         return 0
-    if x == -INFINITY and y > 0 and isodd(y):
-        return -INFINITY
-    if x == -INFINITY and y > 0 and not isodd(y):
-        return INFINITY
-    if x == -INFINITY and y < 0 and isodd(y):
+    if x == float('-inf') and y > 0 and isodd(y):
+        return float('-inf')
+    if x == float('-inf') and y > 0 and not isodd(y):
+        return float('inf')
+    if x == float('-inf') and y < 0 and isodd(y):
         return -0.0
-    if x == -INFINITY and y < 0 and not isodd(y):
+    if x == float('-inf') and y < 0 and not isodd(y):
         return 0
     if eq_signed_zero(x, 0.0) and y > 0:
         return 0
     if eq_signed_zero(x, 0.0) and y < 0:
-        return INFINITY
+        return float('inf')
     if eq_signed_zero(x, -0.0) and y > 0 and isodd(y):
         return -0.0
     if eq_signed_zero(x, -0.0) and y > 0 and not isodd(y):
         return +0
     if eq_signed_zero(x, -0.0) and y < 0 and isodd(y):
-        return -INFINITY
+        return float('-inf')
     if eq_signed_zero(x, -0.0) and y < 0 and not isodd(y):
-        return INFINITY
+        return float('inf')
     if x < 0 and not isinstance(y, int):
-        return NAN
+        return float('nan')
 
     try:
         return math.pow(x, y)
     except OverflowError:
-        return INFINITY
+        return float('inf')
 
 
 # 15.8.2.17
@@ -206,14 +206,14 @@ def js_sqrt(this, args):
     arg0 = get_arg(args, 0)
     x = arg0.ToNumber()
 
-    if isnan(x):
-        return NAN
+    if math.isnan(x):
+        return float('nan')
 
     if x < 0:
-        return NAN
+        return float('nan')
 
-    if isinf(x):
-        return INFINITY
+    if math.isinf(x):
+        return float('inf')
 
     return math.sqrt(x)
 
@@ -224,17 +224,17 @@ def js_log(this, args):
     arg0 = get_arg(args, 0)
     x = arg0.ToNumber()
 
-    if isnan(x):
-        return NAN
+    if math.isnan(x):
+        return float('nan')
 
     if x < 0:
-        return NAN
+        return float('nan')
 
     if x == 0:
-        return -INFINITY
+        return float('-inf')
 
-    if x == INFINITY:
-        return INFINITY
+    if x == float('inf'):
+        return float('inf')
 
     return math.log(x)
 
@@ -245,12 +245,12 @@ def js_min(this, args):
     values = []
     for arg in args:
         value = arg.ToNumber()
-        if isnan(value):
-            return NAN
+        if math.isnan(value):
+            return float('nan')
         values.append(value)
 
     if len(values) == 0:
-        return INFINITY
+        return float('inf')
 
     if len(values) == 1:
         return values[0]
@@ -272,12 +272,12 @@ def js_max(this, args):
     values = []
     for arg in args:
         value = arg.ToNumber()
-        if isnan(value):
-            return NAN
+        if math.isnan(value):
+            return float('nan')
         values.append(value)
 
     if len(values) == 0:
-        return -INFINITY
+        return float('-inf')
 
     if len(values) == 1:
         return values[0]
@@ -296,11 +296,11 @@ def js_sin(this, args):
     arg0 = get_arg(args, 0)
     x = arg0.ToNumber()
 
-    if isnan(x) or isinf(x):
-        return NAN
+    if math.isnan(x) or math.isinf(x):
+        return float('nan')
 
     if x < 0:
-        return NAN
+        return float('nan')
 
     return math.sin(x)
 
@@ -311,11 +311,11 @@ def js_tan(this, args):
     arg0 = get_arg(args, 0)
     x = arg0.ToNumber()
 
-    if isnan(x) or isinf(x):
-        return NAN
+    if math.isnan(x) or math.isinf(x):
+        return float('nan')
 
     if x < 0:
-        return NAN
+        return float('nan')
 
     return math.tan(x)
 
@@ -326,11 +326,11 @@ def js_acos(this, args):
     arg0 = get_arg(args, 0)
     x = arg0.ToNumber()
 
-    if isnan(x) or isinf(x):
-        return NAN
+    if math.isnan(x) or math.isinf(x):
+        return float('nan')
 
     if x > 1 or x < -1:
-        return NAN
+        return float('nan')
 
     return math.acos(x)
 
@@ -341,11 +341,11 @@ def js_asin(this, args):
     arg0 = get_arg(args, 0)
     x = arg0.ToNumber()
 
-    if isnan(x) or isinf(x):
-        return NAN
+    if math.isnan(x) or math.isinf(x):
+        return float('nan')
 
     if x > 1 or x < -1:
-        return NAN
+        return float('nan')
 
     return math.asin(x)
 
@@ -356,13 +356,13 @@ def js_atan(this, args):
     arg0 = get_arg(args, 0)
     x = arg0.ToNumber()
 
-    if isnan(x):
-        return NAN
+    if math.isnan(x):
+        return float('nan')
 
-    if x == INFINITY:
+    if x == float('inf'):
         return math.pi / 2
 
-    if x == -INFINITY:
+    if x == float('-inf'):
         return -math.pi / 2
 
     return math.atan(x)
@@ -376,8 +376,8 @@ def js_atan2(this, args):
     y = arg0.ToNumber()
     x = arg1.ToNumber()
 
-    if isnan(x) or isnan(y):
-        return NAN
+    if math.isnan(x) or math.isnan(y):
+        return float('nan')
 
     return math.atan2(y, x)
 
@@ -388,14 +388,14 @@ def js_ceil(this, args):
     arg0 = get_arg(args, 0)
     x = arg0.ToNumber()
 
-    if isnan(x):
-        return NAN
+    if math.isnan(x):
+        return float('nan')
 
-    if x == INFINITY:
-        return INFINITY
+    if x == float('inf'):
+        return float('inf')
 
-    if x == -INFINITY:
-        return -INFINITY
+    if x == float('-inf'):
+        return float('-inf')
 
     return math.ceil(x)
 
@@ -406,8 +406,8 @@ def js_cos(this, args):
     arg0 = get_arg(args, 0)
     x = arg0.ToNumber()
 
-    if isnan(x) or isinf(x):
-        return NAN
+    if math.isnan(x) or math.isinf(x):
+        return float('nan')
 
     return math.cos(x)
 
@@ -418,20 +418,16 @@ def js_exp(this, args):
     arg0 = get_arg(args, 0)
     x = arg0.ToNumber()
 
-    if isnan(x):
-        return NAN
+    if math.isnan(x):
+        return float('nan')
 
-    if x == INFINITY:
-        return INFINITY
+    if x == float('inf'):
+        return float('inf')
 
-    if x == -INFINITY:
+    if x == float('-inf'):
         return 0
 
     return math.exp(x)
-
-import time
-from rpython.rlib import rrandom
-random = rrandom.Random(int(time.time()))
 
 
 # 15.8.2.14

@@ -1,11 +1,3 @@
-# encoding: utf-8
-"""
-operations.py
-Implements the javascript operations nodes for the interpretation tree
-"""
-from rpython.rlib.unroll import unrolling_iterable
-from rpython.rlib.objectmodel import enforceargs
-
 from js.exception import JsTypeError, JsException
 from js.jscode import JsCode, ast_to_bytecode
 from js.functions import JsExecutableCode, JsFunction
@@ -141,7 +133,7 @@ OPERANDS = {
     '>>>=': 'URSH'
 }
 
-OPERATIONS = unrolling_iterable(OPERANDS.items())
+OPERATIONS = OPERANDS.items()
 
 
 class BaseAssignment(Expression):
@@ -673,7 +665,6 @@ class FloatNumber(BaseNumber):
         bytecode.emit('LOAD_FLOATCONSTANT', self.num)
 
 
-@enforceargs(unicode)
 def string_unquote(string):
     s = string
     if s.startswith('"'):
@@ -688,7 +679,6 @@ def string_unquote(string):
 
 
 class String(Expression):
-    @enforceargs(None, None, unicode)
     def __init__(self, pos, strval):
         self.pos = pos
         self.strval = strval
@@ -1108,4 +1098,4 @@ Not = create_unary_op('NOT')
 UMinus = create_unary_op('UMINUS')
 UPlus = create_unary_op('UPLUS')
 
-unrolling_classes = unrolling_iterable((If, Return, Block, While))
+unrolling_classes = (If, Return, Block, While)

@@ -1,12 +1,7 @@
-# encoding: utf-8
-from rpython.rlib.rfloat import isnan, isinf, NAN, formatd, INFINITY
-from rpython.rlib.objectmodel import enforceargs
-
 from js.property_descriptor import PropertyDescriptor, DataPropertyDescriptor, is_data_descriptor
 from js.exception import JsTypeError, JsRangeError
 from js.object_space import isnull_or_undefined
 from js.completion import Completion
-from js.runistr import encode_unicode_utf8
 from js.constants import hex_rexp, oct_rexp, num_rexp
 
 from js.wrappers.root import W_Root

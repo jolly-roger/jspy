@@ -1,4 +1,5 @@
-from rpython.rlib.rfloat import NAN, INFINITY
+import math
+
 from js.exception import JsRangeError, JsTypeError
 
 from js.wrappers._w import _w
@@ -59,13 +60,13 @@ w_MAX_VALUE = _w(1.7976931348623157e308)
 w_MIN_VALUE = _w(5e-320)
 
 # 15.7.3.4
-w_NAN = _w(NAN)
+w_NAN = _w(float('nan'))
 
 # 15.7.3.5
-w_POSITIVE_INFINITY = _w(INFINITY)
+w_POSITIVE_INFINITY = _w(float('inf'))
 
 # 15.7.3.6
-w_NEGATIVE_INFINITY = _w(-INFINITY)
+w_NEGATIVE_INFINITY = _w(float('-inf'))
 
 
 # 15.7.4.2

@@ -2,8 +2,6 @@
 import os
 
 from rpython.rtyper.lltypesystem import rffi, lltype
-from rpython.rlib.rarithmetic import intmask
-# from pypy.module.rctime.interp_time import c_gmtime, c_localtime, c_mktime, glob_buf, _POSIX, _CYGWIN, _WIN, c_tzset, c_strftime
 
 tmYEAR = 0
 tmMONTH = 1
@@ -187,7 +185,7 @@ def strftime(format, time_t):
                 # More likely, the format yields an empty result,
                 # e.g. an empty format, or %Z when the timezone
                 # is unknown.
-                result = rffi.charp2strn(outbuf, intmask(buflen))
+                result = rffi.charp2strn(outbuf, buflen)
                 return result
         finally:
             lltype.free(outbuf, flavor='raw')

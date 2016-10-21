@@ -19,9 +19,6 @@ from js.wrappers.W__Function import W__Function
 from js.builtins import put_property
 from js.builtins.object_space import object_space
 
-from rpython.rlib.rarithmetic import intmask
-from rpython.rlib.listsort import make_timsort_class
-
 from js.exception import JsTypeError, JsThrowException, JsException, JsSyntaxError
 from js.baseop import plus, sub, AbstractEC, StrictEC, increment, decrement, mult, division, uminus, mod, compare_gt, compare_ge, compare_lt, \
     compare_le
@@ -409,7 +406,7 @@ class LSH(BaseBinaryBitwiseOp):
         lnum = lval.ToInt32()
         rnum = rval.ToUInt32()
 
-        shift_count = intmask(rnum & 0x1F)
+        shift_count = rnum
         res = int32(lnum << shift_count)
 
         ctx.stack_append(_w(res))
@@ -825,8 +822,6 @@ class NEW_NO_ARGS(Opcode):
 
 # ------------ iterator support ----------------
 
-TimSort = make_timsort_class()
-
 
 class LOAD_ITERATOR(Opcode):
     _stack_change = 0
@@ -834,7 +829,7 @@ class LOAD_ITERATOR(Opcode):
     def _make_iterator(self, obj):
         props = []
         properties = obj.named_properties()
-        TimSort(properties).sort()
+        properties.sort()
 
         for key in properties:
             prop = obj.get_property(key)

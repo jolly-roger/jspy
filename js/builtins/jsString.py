@@ -1,5 +1,4 @@
-from rpython.rlib.rfloat import NAN
-from rpython.rlib.rstring import UnicodeBuilder
+import math
 
 from js.exception import JsTypeError
 from js.builtins import get_arg, put_native_function, put_property
@@ -10,6 +9,7 @@ from js.wrappers._w import _w
 from js.wrappers.string import W_String
 from js.wrappers.W_StringObject import W_StringObject
 from js.wrappers.W_StringConstructor import W_StringConstructor
+from js.wrappers.undefined import isundefined
 
 
 def setup(global_object):
@@ -138,7 +138,7 @@ def char_code_at(this, args):
     size = len(string)
 
     if position < 0 or position >= size:
-        return NAN
+        return float('nan')
 
     char = string[position]
     return ord(char)
@@ -183,11 +183,9 @@ def last_index_of(this, args):
     search_str = search_string.to_string()
     num_pos = position.ToNumber()
 
-    from rpython.rlib.rfloat import INFINITY, isnan, isinf
-
-    if isnan(num_pos):
-        pos = INFINITY
-    elif isinf(num_pos):
+    if math.isnan(num_pos):
+        pos = float('inf')
+    elif math.isinf(num_pos):
         pos = num_pos
     else:
         pos = int(num_pos)
@@ -196,7 +194,7 @@ def last_index_of(this, args):
     start = min(max(pos, 0), length)
     search_len = len(search_str)
 
-    if isinf(start):
+    if math.isinf(start):
         idx = s.rfind(search_str)
         return idx
 
@@ -206,7 +204,6 @@ def last_index_of(this, args):
     return idx
 
 
-# pypy/rlib/rstring
 def _rsplit(value, by, maxsplit=-1):
     bylen = len(by)
     if bylen == 0:
@@ -225,12 +222,8 @@ def _rsplit(value, by, maxsplit=-1):
     res.append(value[start:len(value)])
     return res
 
-
-# 15.5.4.14
 @w_return
 def split(this, args):
-    from js.object_space import isundefined
-
     this.check_object_coercible()
 
     separator = get_arg(args, 0, None)
@@ -260,8 +253,6 @@ def split(this, args):
         splitted = _rsplit(string, r, lim)
         return splitted
 
-
-# 15.5.4.15
 @w_return
 def substring(this, args):
     string = this.to_string()
@@ -288,30 +279,10 @@ def substring(this, args):
     assert end >= 0
     return string[start:end]
 
-
-# 15.5.4.16
 @w_return
 def to_lower_case(this, args):
-    from rpython.rlib.unicodedata import unicodedb
+    return this.to_string().lower()
 
-    string = this.to_string()
-    builder = UnicodeBuilder(len(string))
-
-    for char in string:
-        builder.append(unichr(unicodedb.tolower(ord(char))))
-
-    return builder.build()
-
-
-# 15.5.4.18
 @w_return
 def to_upper_case(this, args):
-    from rpython.rlib.unicodedata import unicodedb
-
-    string = this.to_string()
-    builder = UnicodeBuilder(len(string))
-
-    for char in string:
-        builder.append(unichr(unicodedb.toupper(ord(char))))
-
-    return builder.build()
+    return this.to_string().upper()

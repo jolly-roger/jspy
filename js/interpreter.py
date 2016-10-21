@@ -4,7 +4,6 @@ from js.wrappers.W_GlobalObject import W_GlobalObject
 
 from js.jscode import ast_to_bytecode, JsCode
 from js.astbuilder import parse_to_ast
-from js.runistr import decode_str_utf8
 from js.functions import JsGlobalCode
 
 import js.builtins.interpreter
@@ -42,7 +41,7 @@ class Interpreter(object):
         return self.run(code)
 
     def run_src(self, src):
-        ast = parse_to_ast(decode_str_utf8(src))
+        ast = parse_to_ast(src)
         return self.run_ast(ast)
 
     def run(self, code, interactive=False):

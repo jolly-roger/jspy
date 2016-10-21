@@ -3,7 +3,6 @@ from rpython.rlib.parsing.tree import RPythonVisitor, Symbol
 from js import operations
 from js.symbol_map import SymbolMap
 from js.jsparser import parse
-from js.runistr import encode_unicode_utf8, unicode_unescape, decode_str_utf8
 from js.operations import string_unquote, Identifier, Member, MemberDot
 
 
@@ -168,9 +167,9 @@ class ASTBuilder(RPythonVisitor):
         # TODO decode utf-8
         pos = self.get_pos(node)
         s = node.additional_info
-        strval = decode_str_utf8(s)
+        strval = s
         strval = string_unquote(strval)
-        strval = unicode_unescape(strval)
+        strval = strval
 
         return operations.String(pos, strval)
     visit_DOUBLESTRING = string
@@ -681,7 +680,7 @@ def parse_tree_to_ast(parse_tree):
     return tree
 
 def parse_to_ast(code):
-    src = encode_unicode_utf8(code)
+    src = code
     parse_tree = parse(src)
     ast = parse_tree_to_ast(parse_tree)
     return ast

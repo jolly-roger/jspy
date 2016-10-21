@@ -1,6 +1,3 @@
-from rpython.rlib.rarithmetic import intmask
-
-
 from js.wrappers.number import W_Number
 
 
@@ -10,7 +7,7 @@ class W_IntNumber(W_Number):
     """ Number known to be an integer
     """
     def __init__(self, intval):
-        self._intval_ = intmask(intval)
+        self._intval_ = intval
 
     def __str__(self):
         return 'W_IntNumber(%s)' % (self._intval_,)

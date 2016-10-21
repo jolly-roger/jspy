@@ -1,12 +1,4 @@
-# -*- coding: utf-8 -*-
-
-from rpython.rlib.rfloat import NAN, INFINITY, isnan, isinf
-from js.builtins import get_arg
-from js.object_space import w_return
-from rpython.rlib.unicodedata import unicodedb
-from rpython.rlib.parsing.parsing import ParseError
-from rpython.rlib.parsing.deterministic import LexerError
-from rpython.rlib.objectmodel import we_are_translated
+import math
 
 from js.astbuilder import parse_to_ast
 from js.jscode import ast_to_bytecode
@@ -14,9 +6,14 @@ from js.functions import JsEvalCode
 from js.execution_context import EvalExecutionContext
 from js.astbuilder import FakeParseError
 from js.exception import JsSyntaxError
+from js.object_space import w_return
+from js.constants import num_lit_rexp
+from js.completion import NormalCompletion
+from js.interpreter import load_file
+
 from js.builtins import put_intimate_function, put_native_function, put_property
 from js.builtins.jsNumber import w_NAN, w_POSITIVE_INFINITY
-
+from js.builtins import get_arg
 
 from js.wrappers.string import W_String
 from js.wrappers.undefined import newundefined
@@ -57,18 +54,13 @@ def setup(global_object):
 
     put_native_function(global_object, u'version', version)
 
-    ## debugging
-    if not we_are_translated():
-        put_native_function(global_object, u'pypy_repr', pypy_repr)
-        put_native_function(global_object, u'inspect', inspect)
-
 
 # 15.1.2.4
 @w_return
 def is_nan(this, args):
     if len(args) < 1:
         return True
-    return isnan(args[0].ToNumber())
+    return math.isnan(args[0].ToNumber())
 
 
 # 15.1.2.5
@@ -77,32 +69,13 @@ def is_finite(this, args):
     if len(args) < 1:
         return True
     n = args[0].ToNumber()
-    if isinf(n) or isnan(n):
+    if math.isinf(n) or math.isnan(n):
         return False
     else:
         return True
 
-
-def _isspace(uchar):
-    return unicodedb.isspace(ord(uchar))
-
-
 def _strip(unistr, left=True, right=True):
-    lpos = 0
-    rpos = len(unistr)
-
-    if left:
-        while lpos < rpos and _isspace(unistr[lpos]):
-            lpos += 1
-
-    if right:
-        while rpos > lpos and _isspace(unistr[rpos - 1]):
-            rpos -= 1
-
-    assert rpos >= 0
-    result = unistr[lpos:rpos]
-    return result
-
+    return unistr.strip()
 
 def _lstrip(unistr):
     return _strip(unistr, right=False)
@@ -110,7 +83,7 @@ def _lstrip(unistr):
 
 def _string_match_chars(string, chars):
     for char in string:
-        c = unichr(unicodedb.tolower(ord(char)))
+        c = char.lower()
         if c not in chars:
             return False
     return True
@@ -126,79 +99,23 @@ def parse_int(this, args):
 
 
 def _parse_int(string, radix):
-    assert isinstance(string, unicode)
-    NUMERALS = u'0123456789abcdefghijklmnopqrstuvwxyz'
-    input_string = string
-    s = _strip(input_string)
-    sign = 1
-
-    if s.startswith(u'-'):
-        sign = -1
-    if s.startswith(u'-') or s.startswith(u'+'):
-        s = s[1:]
-
-    r = radix
-    strip_prefix = True
-
-    if r != 0:
-        if r < 2 or r > 36:
-            return NAN
-        if r != 16:
-            strip_prefix = False
-    else:
-        r = 10
-
-    if strip_prefix:
-        if len(s) >= 2 and (s.startswith(u'0x') or s.startswith(u'0X')):
-            s = s[2:]
-            r = 16
-        # TODO this is not specified in ecma 5 but tests expect it and it's implemented in v8!
-        elif len(s) > 1 and s.startswith(u'0'):
-            r = 8
-
-    numerals = NUMERALS[:r]
-
-    z = []
-    for char in s:
-        uni_ord = unicodedb.tolower(ord(char))
-        if uni_ord > 128:
-            break
-        c = chr(uni_ord)
-        if c not in numerals:
-            break
-        z.append(c)
-
-    if not z:
-        return NAN
-
-    num_str = ''.join(z)
-
     try:
-        number = int(num_str, r)
-        try:
-            from rpython.rlib.rarithmetic import ovfcheck_float_to_int
-            ovfcheck_float_to_int(number)
-        except OverflowError:
-            number = float(number)
-        return sign * number
+        return int(string)
     except OverflowError:
-        return INFINITY
+        return float('inf')
     except ValueError:
-        pass
+        int(float(string))
 
-    return NAN
+    return float('nan')
 
 
 # 15.1.2.3
 @w_return
 def parse_float(this, args):
-    from js.runistr import encode_unicode_utf8
-    from js.constants import num_lit_rexp
-
     string = get_arg(args, 0)
     input_string = string.to_string()
     trimmed_string = _strip(input_string)
-    str_trimmed_string = encode_unicode_utf8(trimmed_string)
+    str_trimmed_string = trimmed_string
 
     match_data = num_lit_rexp.match(str_trimmed_string)
     if match_data is not None:
@@ -207,9 +124,9 @@ def parse_float(this, args):
         number_string = ''
 
     if number_string == 'Infinity' or number_string == '+Infinity':
-        return INFINITY
+        return float('inf')
     elif number_string == '-Infinity':
-        return -INFINITY
+        return float('-inf')
 
     try:
         number = float(number_string)
@@ -217,7 +134,7 @@ def parse_float(this, args):
     except ValueError:
         pass
 
-    return NAN
+    return float('nan')
 
 
 # @w_return
@@ -230,9 +147,6 @@ def parse_float(this, args):
 #     if len(args) == 0:
 #         return
 # 
-#     from rpython.rlib.rstring import UnicodeBuilder
-#     from js.runistr import encode_unicode_utf8
-# 
 #     builder = UnicodeBuilder()
 #     for arg in args[:-1]:
 #         builder.append(arg.to_string())
@@ -241,7 +155,7 @@ def parse_float(this, args):
 #     builder.append(args[-1].to_string())
 # 
 #     u_print_str = builder.build()
-#     print_str = encode_unicode_utf8(u_print_str)
+#     print_str = u_print_str
 #     print(print_str)
 
 
@@ -362,28 +276,14 @@ def js_eval(ctx):
     x = get_arg(args, 0)
 
     if not isinstance(x, W_String):
-        from js.completion import NormalCompletion
         return NormalCompletion(value=x)
 
     src = x.to_string()
 
     try:
         ast = parse_to_ast(src)
-    except ParseError, e:
-        #error = e.errorinformation.failure_reasons
-        #error_lineno = e.source_pos.lineno
-        #error_pos = e.source_pos.columnno
-        #raise JsSyntaxError(msg = unicode(error), src = unicode(src), line = error_lineno, column = error_pos)
+    except Exception as e:
         raise JsSyntaxError()
-    except FakeParseError, e:
-        #raise JsSyntaxError(msg = unicode(e.msg), src = unicode(src))
-        raise JsSyntaxError()
-    except LexerError, e:
-        #error_lineno = e.source_pos.lineno
-        #error_pos = e.source_pos.columnno
-        error_msg = u'LexerError'
-        #raise JsSyntaxError(msg = error_msg, src = unicode(src), line = error_lineno, column = error_pos)
-        raise JsSyntaxError(msg=error_msg)
 
     symbol_map = ast.symbol_map
     code = ast_to_bytecode(ast, symbol_map)
@@ -397,11 +297,6 @@ def js_eval(ctx):
 
 
 def js_load(ctx):
-    from js.interpreter import load_file
-    from js.jscode import ast_to_bytecode
-    from js.functions import JsEvalCode
-    from js.execution_context import EvalExecutionContext
-
     args = ctx.argv()
     f = get_arg(args, 0)
     filename = f.to_string()

@@ -1,4 +1,4 @@
-from rpython.rlib.rfloat import NAN, isnan
+import math
 
 from js.builtins import get_arg, put_native_function
 from js.builtins.object_space import object_space
@@ -25,7 +25,7 @@ fYEAR = 3
 def setup(global_object):
     ##Date
     # 15.9.5
-    w_DatePrototype = W_DateObject(_w(NAN))
+    w_DatePrototype = W_DateObject(_w(float('nan')))
     # TODO
     #object_space.assign_proto(w_DatePrototype, object_space.proto_object)
     object_space.proto_date = w_DatePrototype
@@ -381,9 +381,9 @@ def set_year(this, args):
     arg0 = get_arg(args, 0)
     year = arg0.ToInteger()
 
-    if isnan(year) or year < 0 or year > 99:
-        this.set_primitive_value(_w(NAN))
-        return NAN
+    if math.isnan(year) or year < 0 or year > 99:
+        this.set_primitive_value(_w(float('nan')))
+        return float('nan')
 
     y = year + 1900
     c = JsDateChange()
